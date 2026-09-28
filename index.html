@@ -63,6 +63,7 @@ body {
   transition: background 0.3s, color 0.3s;
   -webkit-font-smoothing: antialiased;
 }
+body.is-splash { overflow: hidden; }
 .hidden { display: none !important; }
 :focus-visible { outline: 2px solid var(--accent-b); outline-offset: 2px; border-radius: 8px; }
 button, select, input { font-family: inherit; }
@@ -77,6 +78,51 @@ button, select, input { font-family: inherit; }
 }
 
 /* ===========================
+   EQUALIZER（ロゴ・ローディング共通）
+=========================== */
+.eq { display: inline-flex; align-items: flex-end; gap: 3px; height: 18px; }
+.eq span {
+  width: 3px; height: 100%; border-radius: 2px; background: var(--grad);
+  transform-origin: bottom; animation: eq 1.1s ease-in-out infinite;
+}
+.eq span:nth-child(1) { animation-delay: -0.9s; }
+.eq span:nth-child(2) { animation-delay: -0.3s; }
+.eq span:nth-child(3) { animation-delay: -0.6s; }
+.eq span:nth-child(4) { animation-delay: -0.1s; }
+.eq span:nth-child(5) { animation-delay: -0.75s; }
+@keyframes eq {
+  0%, 100% { transform: scaleY(0.25); }
+  50%      { transform: scaleY(1); }
+}
+.eq.slow span { animation-duration: 1.8s; }
+.eq.xs { height: 11px; gap: 2px; }
+.eq.xs span { width: 2px; }
+
+/* ===========================
+   SPLASH（起動時のローディング画面）
+=========================== */
+.splash {
+  position: fixed; inset: 0; z-index: 1000;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 22px;
+  background:
+    radial-gradient(ellipse at 20% 25%, var(--bg-start) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 75%, var(--bg-end) 0%, transparent 60%),
+    var(--surface-solid);
+  transition: opacity .6s ease, visibility .6s ease;
+}
+.splash.hide { opacity: 0; visibility: hidden; }
+.splash .eq { height: 56px; gap: 7px; }
+.splash .eq span { width: 8px; border-radius: 4px; }
+.splash-title {
+  font-size: 26px; font-weight: 800; letter-spacing: -0.03em;
+  background: var(--grad); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+  animation: fadeUp .7s .1s both;
+}
+.splash-sub { font-family: var(--mono); font-size: 11px; letter-spacing: .18em; color: var(--text-muted); animation: fadeUp .7s .25s both; }
+.splash-sub::after { content: ""; animation: dots 1.4s steps(4) infinite; }
+@keyframes dots { 0% { content: ""; } 25% { content: "."; } 50% { content: ".."; } 75% { content: "..."; } }
+
+/* ===========================
    TOP NAV
 =========================== */
 .topnav {
@@ -88,24 +134,26 @@ button, select, input { font-family: inherit; }
   position: sticky; top: 0; z-index: 100;
 }
 .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 17px; letter-spacing: -0.02em; text-decoration: none; color: var(--text); white-space: nowrap; }
-.brand-icon { font-size: 22px; }
 .topnav-right { display: flex; align-items: center; gap: 6px; }
 .tabs { display: flex; gap: 4px; }
 .tab {
   display: flex; align-items: center; gap: 6px; text-decoration: none;
   font-size: 13px; font-weight: 500; color: var(--text-muted);
   padding: 7px 13px; border-radius: 99px;
-  transition: background 0.15s, color 0.15s;
+  transition: background 0.2s, color 0.2s, transform 0.2s;
 }
 .tab-icon { display: none; }
 .tab:hover { background: rgba(120,100,200,0.1); color: var(--text); }
+.tab:active { transform: scale(0.95); }
 .tab[aria-current="page"] { background: var(--grad); color: #fff; }
 .theme-btn {
   background: var(--surface); border: 1px solid var(--border); color: var(--text);
   width: 36px; height: 36px; border-radius: 50%; font-size: 15px; cursor: pointer;
   display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  transition: background 0.2s, transform 0.5s cubic-bezier(.5,1.6,.4,1);
 }
 .theme-btn:hover { background: rgba(120,100,200,0.15); }
+.theme-btn.spin { transform: rotate(360deg); }
 
 /* ===========================
    MAIN
@@ -119,6 +167,10 @@ button, select, input { font-family: inherit; }
 .section-sub { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
 .grad-text { background: var(--grad); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
 
+/* ページ切り替え時のフェードイン（順番に少しずつ表示） */
+@keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+.enter .anim { animation: fadeUp .55s cubic-bezier(.2,.7,.3,1) both; animation-delay: calc(var(--i, 0) * 60ms); }
+
 /* ===========================
    CARD
 =========================== */
@@ -126,13 +178,19 @@ button, select, input { font-family: inherit; }
   background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
   backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
   box-shadow: var(--shadow);
+  transition: border-color .25s, box-shadow .25s;
+}
+.data-card:hover, .live-card:hover, .stat-block:hover {
+  border-color: color-mix(in srgb, var(--accent-a) 55%, transparent);
+  box-shadow: 0 8px 30px rgba(120,100,200,0.16);
 }
 .card { padding: 24px; }
 .card-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 16px; }
-.card-label, .stat-block-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em; color: var(--text-muted); }
-.label-sub { font-family: var(--font); letter-spacing: 0; font-size: 11px; opacity: .75; margin-left: 6px; }
+.card-label, .stat-block-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em; color: var(--text-muted); display: flex; align-items: center; gap: 8px; }
+.label-sub { font-family: var(--font); letter-spacing: 0; font-size: 11px; opacity: .75; }
 .more-link { font-size: 12px; font-weight: 600; color: var(--accent-a); text-decoration: none; white-space: nowrap; }
-.more-link:hover { text-decoration: underline; }
+.more-link .arrow { display: inline-block; transition: transform .2s; }
+.more-link:hover .arrow { transform: translateX(3px); }
 
 /* 集計方法（ⓘ） */
 .info { position: relative; font-size: 12px; }
@@ -146,6 +204,7 @@ button, select, input { font-family: inherit; }
   position: absolute; right: 0; top: 32px; z-index: 10; width: 250px;
   background: var(--surface-solid); border: 1px solid var(--border); border-radius: 12px;
   box-shadow: var(--shadow); padding: 12px 14px; line-height: 1.7; color: var(--text-muted);
+  animation: fadeUp .2s both;
 }
 .info-body b { color: var(--text); font-weight: 600; }
 
@@ -156,7 +215,7 @@ button, select, input { font-family: inherit; }
 .stat-row.three { grid-template-columns: repeat(3, 1fr); }
 .stat-block { padding: 22px 20px 20px; min-width: 0; }
 .stat-block-label { margin-bottom: 12px; }
-.stat-block-num { font-size: clamp(28px, 4vw, 48px); font-weight: 800; letter-spacing: -0.03em; line-height: 1.05; margin-bottom: 8px; overflow-wrap: anywhere; }
+.stat-block-num { font-size: clamp(28px, 4vw, 48px); font-weight: 800; letter-spacing: -0.03em; line-height: 1.05; margin-bottom: 8px; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
 .stat-block-num.sm { font-size: clamp(22px, 3vw, 34px); }
 .unit { font-size: 0.45em; font-weight: 700; margin-left: 4px; }
 .stat-block-sub { font-size: 12px; color: var(--text-muted); }
@@ -172,37 +231,39 @@ button, select, input { font-family: inherit; }
 =========================== */
 .ranking-row {
   display: grid; grid-template-columns: 30px 1fr auto; align-items: center; gap: 10px;
-  padding: 9px 0; border-bottom: 1px solid var(--border);
+  padding: 9px 6px; margin: 0 -6px; border-bottom: 1px solid var(--border); border-radius: 8px;
+  transition: background .2s;
 }
+.ranking-row:hover { background: rgba(120,100,200,0.06); }
 .ranking-row:last-child { border-bottom: none; }
 .ranking-medal { font-size: 15px; text-align: center; }
 .rank-num { font-family: var(--mono); font-size: 11px; color: var(--text-dim); }
 .ranking-name-wrap { min-width: 0; }
 .ranking-name { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
 .ranking-bar-wrap { margin-top: 5px; height: 4px; background: rgba(120,100,200,0.12); border-radius: 99px; overflow: hidden; }
-.ranking-bar { height: 100%; background: var(--grad-bar); border-radius: 99px; transform-origin: left; animation: grow .6s ease-out both; }
+.ranking-bar { height: 100%; background: var(--grad-bar); border-radius: 99px; transform-origin: left; animation: grow .9s cubic-bezier(.2,.7,.3,1) both; }
 @keyframes grow { from { transform: scaleX(0); } }
 .ranking-score { font-family: var(--mono); font-size: 11px; color: var(--text-muted); white-space: nowrap; }
 .breakdown { display: flex; flex-wrap: wrap; gap: 4px 10px; margin-top: 6px; font-size: 11px; color: var(--text-muted); }
 .breakdown span b { font-family: var(--mono); font-weight: 700; color: var(--text); margin-left: 2px; }
-
-.full-ranking .ranking-row { padding: 12px 0; }
+.full-ranking .ranking-row { padding: 12px 6px; }
 .full-ranking .ranking-name { font-size: 14px; }
 .full-ranking .ranking-score { font-size: 13px; color: var(--text); font-weight: 700; }
-
 .search-input {
   background: var(--surface); border: 1px solid var(--border); color: var(--text);
   font-size: 13px; padding: 8px 14px; border-radius: 99px; width: 220px; max-width: 100%;
+  transition: border-color .2s, box-shadow .2s;
 }
+.search-input:focus { outline: none; border-color: var(--accent-a); box-shadow: 0 0 0 3px rgba(167,139,250,0.2); }
 .search-input::placeholder { color: var(--text-dim); }
 
 /* ===========================
    LATEST WEEK
 =========================== */
 .latest-inner { display: grid; grid-template-columns: auto 1fr 1.3fr; gap: 32px; align-items: start; }
-.latest-time { font-size: 44px; font-weight: 800; letter-spacing: -0.04em; line-height: 1; }
+.latest-time { font-size: 44px; font-weight: 800; letter-spacing: -0.04em; line-height: 1; font-variant-numeric: tabular-nums; }
 .latest-meta { font-size: 12px; color: var(--text-muted); margin-top: 6px; font-family: var(--mono); }
-.delta { display: inline-flex; align-items: center; gap: 4px; margin-top: 10px; font-size: 12px; font-weight: 600; font-family: var(--mono); padding: 3px 10px; border-radius: 99px; }
+.delta { display: inline-flex; align-items: center; gap: 4px; margin-top: 10px; font-size: 12px; font-weight: 600; font-family: var(--mono); padding: 3px 10px; border-radius: 99px; animation: fadeUp .5s .6s both; }
 .delta.up   { color: var(--green); background: color-mix(in srgb, var(--green) 12%, transparent); }
 .delta.down { color: var(--red);   background: color-mix(in srgb, var(--red) 12%, transparent); }
 .delta.flat { color: var(--text-muted); background: rgba(120,100,200,0.08); }
@@ -223,12 +284,13 @@ button, select, input { font-family: inherit; }
 =========================== */
 .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
 .data-card { padding: 20px; }
-.data-card-title { font-size: 20px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 4px; }
+.data-card-title { font-size: 20px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 4px; display: flex; align-items: center; flex-wrap: wrap; }
 .data-card-title .yr { font-size: 13px; color: var(--text-muted); font-weight: 500; margin-right: 6px; }
 .data-card-time { font-family: var(--mono); font-size: 12px; color: var(--green); }
 .data-card-divider { border: none; border-top: 1px solid var(--border); margin: 14px 0 12px; }
 .data-card.is-latest { border-color: var(--accent-a); }
-.badge { font-size: 10px; font-weight: 700; letter-spacing: .08em; color: #fff; background: var(--grad); padding: 2px 8px; border-radius: 99px; margin-left: 6px; vertical-align: middle; }
+.badge { display: inline-flex; align-items: center; gap: 5px; font-size: 10px; font-weight: 700; letter-spacing: .08em; color: #fff; background: var(--grad); padding: 3px 8px; border-radius: 99px; margin-left: 8px; }
+.badge .eq span { background: #fff; }
 
 /* ===========================
    LIVE
@@ -288,7 +350,6 @@ button, select, input { font-family: inherit; }
 @media (max-width: 680px) {
   .topnav { padding: 0 16px; height: 54px; }
   .content { padding: 20px 16px calc(96px + env(safe-area-inset-bottom)); }
-  /* スマホは下部タブバー */
   .tabs {
     position: fixed; left: 0; right: 0; bottom: 0; z-index: 100;
     display: grid; grid-template-columns: repeat(5, 1fr); gap: 2px;
@@ -298,8 +359,9 @@ button, select, input { font-family: inherit; }
     border-top: 1px solid var(--border);
   }
   .tab { flex-direction: column; gap: 3px; padding: 6px 0; font-size: 10px; border-radius: 12px; justify-content: center; }
-  .tab-icon { display: block; font-size: 18px; line-height: 1; }
+  .tab-icon { display: block; font-size: 18px; line-height: 1; transition: transform .25s cubic-bezier(.5,1.6,.4,1); }
   .tab[aria-current="page"] { background: rgba(120,100,200,0.14); color: var(--text); }
+  .tab[aria-current="page"] .tab-icon { transform: translateY(-2px) scale(1.12); }
   .section-header h2 { font-size: 24px; }
   .stat-row, .stat-row.three { grid-template-columns: 1fr; }
   .card { padding: 18px; }
@@ -316,11 +378,22 @@ button, select, input { font-family: inherit; }
 }
 </style>
 </head>
-<body>
+<body class="is-splash">
+<script>
+  // テーマを最初に決めて、ローディング画面が一瞬白く光るのを防ぐ
+  if (window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches) document.body.classList.add("dark");
+</script>
+
+<!-- ===== SPLASH ===== -->
+<div id="splash" class="splash" aria-hidden="true">
+  <div class="eq"><span></span><span></span><span></span><span></span><span></span></div>
+  <div class="splash-title">My Music Archive</div>
+  <div class="splash-sub">LOADING</div>
+</div>
 
 <header class="topnav">
   <a class="brand" href="#dashboard">
-    <span class="brand-icon grad-text" aria-hidden="true">♫</span>
+    <span class="eq slow" aria-hidden="true"><span></span><span></span><span></span><span></span></span>
     <span>My Music Archive</span>
   </a>
   <div class="topnav-right">
@@ -346,22 +419,25 @@ button, select, input { font-family: inherit; }
   <!-- ===== DASHBOARD ===== -->
   <section id="dashboard">
     <div class="stat-row">
-      <div class="stat-block">
+      <div class="stat-block anim">
         <div class="stat-block-label">TOTAL LISTENING</div>
         <div id="totalMinutes" class="stat-block-num grad-text"><span class="skel skel-num"></span></div>
         <div id="totalDays" class="stat-block-sub">全期間の合計再生時間</div>
       </div>
-      <div class="stat-block">
+      <div class="stat-block anim">
         <div class="stat-block-label" id="thisYearLabel">THIS YEAR</div>
         <div id="thisYearMinutes" class="stat-block-num grad-text"><span class="skel skel-num"></span></div>
         <div id="thisYearSub" class="stat-block-sub">今年の合計再生時間</div>
       </div>
     </div>
 
-    <div class="card" style="margin-bottom:16px">
+    <div class="card anim" style="margin-bottom:16px">
       <div class="card-head">
-        <div class="card-label">LATEST WEEK</div>
-        <a class="more-link" href="#weekly">週ごとの記録 →</a>
+        <div class="card-label">
+          <span class="eq xs" aria-hidden="true"><span></span><span></span><span></span></span>
+          LATEST WEEK
+        </div>
+        <a class="more-link" href="#weekly">週ごとの記録 <span class="arrow">→</span></a>
       </div>
       <div id="latestWeek">
         <span class="skel skel-line" style="width:40%"></span>
@@ -371,10 +447,10 @@ button, select, input { font-family: inherit; }
     </div>
 
     <div class="mid-row">
-      <div class="card">
+      <div class="card anim">
         <div class="card-head">
           <div class="card-label">ARTIST RANKING<span class="label-sub">TOP 5</span></div>
-          <a class="more-link" href="#ranking">すべて見る →</a>
+          <a class="more-link" href="#ranking">すべて見る <span class="arrow">→</span></a>
         </div>
         <div id="artistRankingTop">
           <span class="skel skel-line"></span><span class="skel skel-line"></span>
@@ -382,7 +458,7 @@ button, select, input { font-family: inherit; }
           <span class="skel skel-line"></span>
         </div>
       </div>
-      <div class="card">
+      <div class="card anim">
         <div class="card-head"><div class="card-label" id="chartLabel">WEEKLY TREND</div></div>
         <div class="chart-wrap"><canvas id="weeklyChart" aria-label="週ごとの再生時間グラフ" role="img"></canvas></div>
       </div>
@@ -391,7 +467,7 @@ button, select, input { font-family: inherit; }
 
   <!-- ===== RANKING ===== -->
   <section id="ranking" class="hidden">
-    <div class="section-header">
+    <div class="section-header anim">
       <div>
         <h2>Artist Ranking</h2>
         <p class="section-sub">全期間のアーティストランキング</p>
@@ -410,7 +486,7 @@ button, select, input { font-family: inherit; }
         </details>
       </div>
     </div>
-    <div class="card full-ranking">
+    <div class="card full-ranking anim">
       <div id="artistRankingFull">
         <span class="skel skel-line"></span><span class="skel skel-line"></span><span class="skel skel-line"></span>
       </div>
@@ -419,14 +495,14 @@ button, select, input { font-family: inherit; }
 
   <!-- ===== WEEKLY ===== -->
   <section id="weekly" class="hidden">
-    <div class="section-header">
+    <div class="section-header anim">
       <div>
         <h2>Weekly History</h2>
         <p class="section-sub">週ごとの記録</p>
       </div>
       <div class="filter-bar">
         <span id="weeklyCount" class="count-chip"></span>
-        <select id="weeklyYearFilter" aria-label="年で絞り込み" onchange="renderWeekly()">
+        <select id="weeklyYearFilter" aria-label="年で絞り込み" onchange="renderWeekly(); enterSection('weekly')">
           <option value="all">すべての年</option>
         </select>
       </div>
@@ -438,7 +514,7 @@ button, select, input { font-family: inherit; }
 
   <!-- ===== ANNUAL ===== -->
   <section id="annual" class="hidden">
-    <div class="section-header">
+    <div class="section-header anim">
       <div>
         <h2>Annual History</h2>
         <p class="section-sub">年間サマリー</p>
@@ -451,32 +527,31 @@ button, select, input { font-family: inherit; }
 
   <!-- ===== LIVE ===== -->
   <section id="live" class="hidden">
-    <div class="section-header">
+    <div class="section-header anim">
       <div>
         <h2>Live Archive</h2>
         <p class="section-sub">参加したライブの記録</p>
       </div>
       <div class="filter-bar">
         <span id="liveCount" class="count-chip"></span>
-        <select id="liveYearFilter" aria-label="年で絞り込み" onchange="renderLive()">
+        <select id="liveYearFilter" aria-label="年で絞り込み" onchange="renderLive(); enterSection('live')">
           <option value="all">すべての年</option>
         </select>
       </div>
     </div>
 
-    <!-- Most Seen はダッシュボードからこちらへ移動 -->
     <div class="stat-row three">
-      <div class="stat-block">
+      <div class="stat-block anim">
         <div class="stat-block-label">MOST SEEN ARTIST</div>
         <div id="mostSeenArtist" class="stat-block-num sm grad-text">—</div>
         <div id="mostSeenCount" class="stat-block-sub"></div>
       </div>
-      <div class="stat-block">
+      <div class="stat-block anim">
         <div class="stat-block-label">TOTAL SHOWS</div>
         <div id="liveTotal" class="stat-block-num sm grad-text">—</div>
         <div class="stat-block-sub">通算公演数</div>
       </div>
-      <div class="stat-block">
+      <div class="stat-block anim">
         <div class="stat-block-label" id="liveThisYearLabel">THIS YEAR</div>
         <div id="liveThisYear" class="stat-block-num sm grad-text">—</div>
         <div class="stat-block-sub">今年の公演数</div>
@@ -501,14 +576,18 @@ const weeklyUrl = `${BASE}?gid=0&single=true&output=csv`;
 const yearUrl   = `${BASE}?gid=575136021&single=true&output=csv`;
 const liveUrl   = `${BASE}?gid=1117584699&single=true&output=csv`;
 
-const CHART_WEEKS = 5;                                // グラフの週数。ここを変えるとラベルも自動で変わる
-const DASH_RANK   = 5;                                // ダッシュボードに出すランキング件数
-const THIS_YEAR   = String(new Date().getFullYear()); // 「2026」の直書きをやめて自動化
-const SECTIONS    = ["dashboard", "ranking", "weekly", "annual", "live"];
+const CHART_WEEKS  = 5;                               // グラフの週数（ラベルも自動で連動）
+const DASH_RANK    = 5;                               // ダッシュボードのランキング件数
+const SPLASH_MIN   = 1200;                            // ローディング画面を最低何ミリ秒見せるか
+const THIS_YEAR    = String(new Date().getFullYear());
+const SECTIONS     = ["dashboard", "ranking", "weekly", "annual", "live"];
+const REDUCED      = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 
 let weeklyData = [], yearlyData = [], liveData = [];
 let rankingAll = [];
 let chartInst = null;
+let currentSection = "dashboard";
+const startedAt = performance.now();
 
 /* ===========================
    UTIL
@@ -517,6 +596,55 @@ const esc = s => String(s ?? "").replace(/[&<>"']/g, c =>
   ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
 const fmt = n => Number(n).toLocaleString("ja-JP");
 const $ = id => document.getElementById(id);
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+/* ===========================
+   SPLASH
+=========================== */
+async function hideSplash() {
+  const wait = SPLASH_MIN - (performance.now() - startedAt);
+  if (wait > 0 && !REDUCED) await sleep(wait);
+  $("splash").classList.add("hide");
+  document.body.classList.remove("is-splash");
+}
+
+/* ===========================
+   カウントアップ（数字が0から増えていく演出）
+   data-count に目標値、data-unit に単位を入れておくと動く
+=========================== */
+function setCount(el, value, unit = "") {
+  el.dataset.count = value;
+  el.dataset.unit = unit;
+  el.innerHTML = `${fmt(value)}${unit ? `<span class="unit">${unit}</span>` : ""}`;
+}
+function runCounters(root) {
+  root.querySelectorAll("[data-count]").forEach(el => {
+    const target = Number(el.dataset.count), unit = el.dataset.unit || "";
+    const suffix = unit ? `<span class="unit">${unit}</span>` : "";
+    if (REDUCED || target === 0) { el.innerHTML = fmt(target) + suffix; return; }
+    const dur = 1300, t0 = performance.now();
+    cancelAnimationFrame(el._raf);
+    const tick = now => {
+      const p = Math.min(1, (now - t0) / dur);
+      const eased = 1 - Math.pow(1 - p, 4);
+      el.innerHTML = fmt(Math.round(target * eased)) + suffix;
+      if (p < 1) el._raf = requestAnimationFrame(tick);
+    };
+    el._raf = requestAnimationFrame(tick);
+  });
+}
+
+/* ===========================
+   ページ表示時の演出（フェードイン＋カウントアップ）
+=========================== */
+function enterSection(id) {
+  const sec = $(id);
+  sec.querySelectorAll(".anim").forEach((el, i) => el.style.setProperty("--i", Math.min(i, 14)));
+  sec.classList.remove("enter");
+  void sec.offsetWidth;          // アニメーションを最初から再生させるためのリセット
+  sec.classList.add("enter");
+  runCounters(sec);
+}
 
 /* ===========================
    FETCH
@@ -530,9 +658,11 @@ async function loadData() {
     weeklyData = parseWeekly(w);
     yearlyData = parseYear(y);
     liveData   = parseLive(l);
+    await hideSplash();
     renderAll();
   } catch (err) {
     console.error("データ取得エラー:", err);
+    await hideSplash();
     $("errorBanner").classList.remove("hidden");
   }
 }
@@ -593,6 +723,7 @@ function renderAll() {
   renderLiveStats();
   renderLive();
   renderChart();
+  enterSection(currentSection);
 }
 
 function fillYearFilter(id, data) {
@@ -635,7 +766,7 @@ function rankingRowsHtml(list, withBreakdown) {
       <span class="ranking-medal">${medals[r.rank] ?? `<span class="rank-num">${r.rank}</span>`}</span>
       <div class="ranking-name-wrap">
         <span class="ranking-name" title="${esc(r.name)}">${esc(r.name)}</span>
-        <div class="ranking-bar-wrap"><div class="ranking-bar" style="width:${Math.round(r.total / topScore * 100)}%;animation-delay:${Math.min(i, 15) * 30}ms"></div></div>
+        <div class="ranking-bar-wrap"><div class="ranking-bar" style="width:${Math.round(r.total / topScore * 100)}%;animation-delay:${200 + Math.min(i, 15) * 50}ms"></div></div>
         ${withBreakdown ? `<div class="breakdown">
           ${r.weekly ? `<span>週間<b>${r.weekly}</b></span>` : ""}
           ${r.annual ? `<span>年間<b>${r.annual}</b></span>` : ""}
@@ -665,17 +796,17 @@ function updateDashboard() {
   const totalMin =
     yearlyData.reduce((a, b) => a + b.minutes, 0) +
     weeklyData.filter(w => !annualYears.has(w.year)).reduce((a, b) => a + b.minutes, 0);
-  $("totalMinutes").innerHTML = `${fmt(totalMin)}<span class="unit">分</span>`;
+  setCount($("totalMinutes"), totalMin, "分");
   const days = Math.floor(totalMin / 1440), hours = Math.floor((totalMin % 1440) / 60);
-  $("totalDays").textContent = `約 ${days} 日 ${hours} 時間ぶん`;
+  $("totalDays").textContent = `約 ${days} 日 ${hours} 時間`;
 
   /* 今年 */
   $("thisYearLabel").textContent = `${THIS_YEAR} LISTENING`;
   const yw = weeklyData.filter(w => w.year === THIS_YEAR);
   const minYear = yw.reduce((a, b) => a + b.minutes, 0);
   if (minYear > 0) {
-    $("thisYearMinutes").innerHTML = `${fmt(minYear)}<span class="unit">分</span>`;
-    $("thisYearSub").textContent = `${yw.length}週ぶん · 週平均 ${fmt(Math.round(minYear / yw.length))}分`;
+    setCount($("thisYearMinutes"), minYear, "分");
+    $("thisYearSub").textContent = `${yw.length}週 · 週平均 ${fmt(Math.round(minYear / yw.length))}分`;
   } else {
     $("thisYearMinutes").textContent = "—";
     $("thisYearSub").textContent = "まだ記録がありません";
@@ -699,13 +830,14 @@ function updateDashboard() {
   $("latestWeek").innerHTML = `
     <div class="latest-inner">
       <div>
-        <div class="latest-time grad-text">${fmt(latest.minutes)}<span class="unit">分</span></div>
+        <div class="latest-time grad-text" id="latestMinutes"></div>
         <div class="latest-meta">${esc(latest.year)} / ${esc(latest.week)}</div>
         ${deltaHtml}
       </div>
       <div><div class="mini-label">TOP ARTISTS</div>${artistListHtml(latest.tops)}</div>
       <div><div class="mini-label">REPEAT TRACKS 🔁</div>${trackListHtml(latest.repeats)}</div>
     </div>`;
+  setCount($("latestMinutes"), latest.minutes, "分");
 }
 
 function artistListHtml(list, marks) {
@@ -728,9 +860,10 @@ function renderWeekly() {
   const latest = weeklyData.at(-1);
   const data = [...weeklyData].reverse().filter(w => year === "all" || w.year === year);
   $("weeklyCount").textContent = `${data.length}週`;
+  const nowBadge = `<span class="badge"><span class="eq xs"><span></span><span></span><span></span></span>LATEST</span>`;
   $("weeklyList").innerHTML = data.length ? data.map(w => `
-    <article class="data-card ${w === latest ? "is-latest" : ""}">
-      <div class="data-card-title"><span class="yr">${esc(w.year)}</span>${esc(w.week)}${w === latest ? `<span class="badge">LATEST</span>` : ""}</div>
+    <article class="data-card anim ${w === latest ? "is-latest" : ""}">
+      <div class="data-card-title"><span class="yr">${esc(w.year)}</span>${esc(w.week)}${w === latest ? nowBadge : ""}</div>
       <div class="data-card-time">⏱ ${fmt(w.minutes)} 分</div>
       <hr class="data-card-divider">
       <div class="mini-label">TOP ARTISTS</div>
@@ -746,7 +879,7 @@ function renderAnnual() {
   const marks = ["🥇", "🥈", "🥉", "4", "5"];
   const data = [...yearlyData].reverse();
   $("annualList").innerHTML = data.length ? data.map(y => `
-    <article class="data-card">
+    <article class="data-card anim">
       <div class="data-card-title">${esc(y.year)}</div>
       <div class="data-card-time">⏱ ${fmt(y.minutes)} 分 · ${fmt(y.songs)} 曲</div>
       <hr class="data-card-divider">
@@ -765,9 +898,9 @@ function renderLiveStats() {
   const bests = Object.keys(counts).filter(k => counts[k] === max);   // 同数なら全員表示
   $("mostSeenArtist").textContent = max ? bests.join(" / ") : "—";
   $("mostSeenCount").textContent  = max ? `${max}回 参戦` : "まだ記録がありません";
-  $("liveTotal").innerHTML = `${fmt(liveData.length)}<span class="unit">公演</span>`;
+  setCount($("liveTotal"), liveData.length, "公演");
   $("liveThisYearLabel").textContent = `${THIS_YEAR} SHOWS`;
-  $("liveThisYear").innerHTML = `${fmt(liveData.filter(l => l.year === THIS_YEAR).length)}<span class="unit">公演</span>`;
+  setCount($("liveThisYear"), liveData.filter(l => l.year === THIS_YEAR).length, "公演");
 }
 
 function renderLive() {
@@ -779,11 +912,11 @@ function renderLive() {
   let html = `<div class="live-grid">`, lastYear = null;
   data.forEach(l => {
     if (year === "all" && l.year !== lastYear) {
-      html += `<div class="year-divider">${esc(l.year)} · ${data.filter(x => x.year === l.year).length}公演</div>`;
+      html += `<div class="year-divider anim">${esc(l.year)} · ${data.filter(x => x.year === l.year).length}公演</div>`;
       lastYear = l.year;
     }
     html += `
-      <article class="live-card">
+      <article class="live-card anim">
         <div class="live-card-left">
           <div class="live-card-year">${esc(l.year)}</div>
           <div class="live-card-date">${esc(l.date)}</div>
@@ -798,7 +931,7 @@ function renderLive() {
 }
 
 /* ===========================
-   CHART（最新週をハイライト・平均表示）
+   CHART（最新週をハイライト・下から伸びるアニメーション）
 =========================== */
 function renderChart() {
   if (typeof Chart === "undefined") return;
@@ -825,6 +958,10 @@ function renderChart() {
     },
     options: {
       responsive: true, maintainAspectRatio: false,
+      animation: REDUCED ? false : {
+        duration: 900, easing: "easeOutQuart",
+        delay: ctx => ctx.type === "data" && ctx.mode === "default" ? ctx.dataIndex * 90 : 0
+      },
       plugins: {
         legend: { display: false },
         tooltip: {
@@ -845,7 +982,7 @@ function renderChart() {
 }
 
 /* ===========================
-   THEME（初期値はOSの設定に合わせる）
+   THEME
 =========================== */
 function applyTheme(dark) {
   document.body.classList.toggle("dark", !!dark);
@@ -853,8 +990,10 @@ function applyTheme(dark) {
   $("themeBtn").setAttribute("aria-label", dark ? "ライトモードにする" : "ダークモードにする");
 }
 function toggleTheme() {
+  const btn = $("themeBtn");
+  btn.classList.toggle("spin");
   applyTheme(!document.body.classList.contains("dark"));
-  renderChart();
+  if (weeklyData.length) renderChart();
 }
 
 /* ===========================
@@ -862,19 +1001,24 @@ function toggleTheme() {
 =========================== */
 function showSection() {
   const id = SECTIONS.includes(location.hash.slice(1)) ? location.hash.slice(1) : "dashboard";
+  currentSection = id;
   SECTIONS.forEach(s => $(s).classList.toggle("hidden", s !== id));
   document.querySelectorAll(".tab").forEach(t =>
     t.dataset.section === id ? t.setAttribute("aria-current", "page") : t.removeAttribute("aria-current"));
   window.scrollTo({ top: 0 });
+  enterSection(id);
+  // ダッシュボードに戻ったらグラフも伸び直す
+  if (id === "dashboard" && weeklyData.length) renderChart();
 }
 window.addEventListener("hashchange", showSection);
 
 /* ===========================
    INIT
 =========================== */
-applyTheme(window.matchMedia?.("(prefers-color-scheme: dark)").matches);
+applyTheme(document.body.classList.contains("dark"));
 showSection();
 loadData();
 </script>
 </body>
+</html>
 </html>
