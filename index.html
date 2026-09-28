@@ -1,111 +1,880 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Music Archive</title>
-    <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>My Music Archive</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+/* ===========================
+   ROOT & THEME
+=========================== */
+:root {
+  --bg-start: #e8e4f8;
+  --bg-mid:   #f5e4f0;
+  --bg-end:   #ddf0f8;
+  --surface:  rgba(255,255,255,0.75);
+  --surface-solid: #ffffff;
+  --nav-bg:   rgba(255,255,255,0.78);
+  --border:   rgba(180,170,220,0.35);
+  --text:     #1a1628;
+  --text-muted: #6b6384;
+  --text-dim:   #8f86ad;
+  --accent-a: #7b5ea7;
+  --accent-b: #38bdf8;
+  --grad: linear-gradient(120deg, #a78bfa, #38bdf8);
+  --grad-bar: linear-gradient(90deg, #a78bfa, #38bdf8);
+  --green: #059669;
+  --red:   #dc2626;
+  --skel-a: rgba(120,100,200,0.08);
+  --skel-b: rgba(120,100,200,0.18);
+  --font: 'Inter', 'Hiragino Sans', 'Noto Sans JP', sans-serif;
+  --mono: 'Space Mono', monospace;
+  --radius: 18px;
+  --shadow: 0 4px 24px rgba(120,100,200,0.10);
+}
+body.dark {
+  --bg-start: #12101e;
+  --bg-mid:   #1a1228;
+  --bg-end:   #0f1a24;
+  --surface:  rgba(30,26,50,0.85);
+  --surface-solid: #16132a;
+  --nav-bg:   rgba(18,16,30,0.82);
+  --border:   rgba(120,100,200,0.2);
+  --text:     #ede8ff;
+  --text-muted: #9a92bd;
+  --text-dim:   #6b6490;
+  --accent-a: #a78bfa;
+  --green: #34d399;
+  --red:   #f87171;
+  --skel-a: rgba(255,255,255,0.04);
+  --skel-b: rgba(255,255,255,0.10);
+  --shadow: 0 4px 24px rgba(0,0,0,0.35);
+}
+
+/* ===========================
+   BASE
+=========================== */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--font); color: var(--text);
+  background: var(--surface-solid); min-height: 100vh;
+  transition: background 0.3s, color 0.3s;
+  -webkit-font-smoothing: antialiased;
+}
+.hidden { display: none !important; }
+:focus-visible { outline: 2px solid var(--accent-b); outline-offset: 2px; border-radius: 8px; }
+button, select, input { font-family: inherit; }
+
+.page-bg {
+  min-height: 100vh;
+  background:
+    radial-gradient(ellipse at 10% 20%, var(--bg-start) 0%, transparent 55%),
+    radial-gradient(ellipse at 90% 80%, var(--bg-end) 0%, transparent 55%),
+    radial-gradient(ellipse at 50% 50%, var(--bg-mid) 0%, transparent 70%),
+    var(--surface-solid);
+}
+
+/* ===========================
+   TOP NAV
+=========================== */
+.topnav {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding: 0 32px; height: 60px;
+  background: var(--nav-bg);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 100;
+}
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 17px; letter-spacing: -0.02em; text-decoration: none; color: var(--text); white-space: nowrap; }
+.brand-icon { font-size: 22px; }
+.topnav-right { display: flex; align-items: center; gap: 6px; }
+.tabs { display: flex; gap: 4px; }
+.tab {
+  display: flex; align-items: center; gap: 6px; text-decoration: none;
+  font-size: 13px; font-weight: 500; color: var(--text-muted);
+  padding: 7px 13px; border-radius: 99px;
+  transition: background 0.15s, color 0.15s;
+}
+.tab-icon { display: none; }
+.tab:hover { background: rgba(120,100,200,0.1); color: var(--text); }
+.tab[aria-current="page"] { background: var(--grad); color: #fff; }
+.theme-btn {
+  background: var(--surface); border: 1px solid var(--border); color: var(--text);
+  width: 36px; height: 36px; border-radius: 50%; font-size: 15px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.theme-btn:hover { background: rgba(120,100,200,0.15); }
+
+/* ===========================
+   MAIN
+=========================== */
+.content { max-width: 1100px; margin: 0 auto; padding: 36px 32px 60px; }
+.section-header { margin-bottom: 24px; display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.section-header h2 {
+  font-size: 28px; font-weight: 800; letter-spacing: -0.03em;
+  background: var(--grad); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+}
+.section-sub { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+.grad-text { background: var(--grad); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+
+/* ===========================
+   CARD
+=========================== */
+.card, .stat-block, .data-card, .live-card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  box-shadow: var(--shadow);
+}
+.card { padding: 24px; }
+.card-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 16px; }
+.card-label, .stat-block-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em; color: var(--text-muted); }
+.label-sub { font-family: var(--font); letter-spacing: 0; font-size: 11px; opacity: .75; margin-left: 6px; }
+.more-link { font-size: 12px; font-weight: 600; color: var(--accent-a); text-decoration: none; white-space: nowrap; }
+.more-link:hover { text-decoration: underline; }
+
+/* 集計方法（ⓘ） */
+.info { position: relative; font-size: 12px; }
+.info summary {
+  list-style: none; cursor: pointer; color: var(--text-muted);
+  font-size: 11px; padding: 4px 10px; border-radius: 99px; border: 1px solid var(--border); white-space: nowrap;
+}
+.info summary::-webkit-details-marker { display: none; }
+.info[open] summary { color: var(--text); }
+.info-body {
+  position: absolute; right: 0; top: 32px; z-index: 10; width: 250px;
+  background: var(--surface-solid); border: 1px solid var(--border); border-radius: 12px;
+  box-shadow: var(--shadow); padding: 12px 14px; line-height: 1.7; color: var(--text-muted);
+}
+.info-body b { color: var(--text); font-weight: 600; }
+
+/* ===========================
+   STAT ROW
+=========================== */
+.stat-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-bottom: 16px; }
+.stat-row.three { grid-template-columns: repeat(3, 1fr); }
+.stat-block { padding: 22px 20px 20px; min-width: 0; }
+.stat-block-label { margin-bottom: 12px; }
+.stat-block-num { font-size: clamp(28px, 4vw, 48px); font-weight: 800; letter-spacing: -0.03em; line-height: 1.05; margin-bottom: 8px; overflow-wrap: anywhere; }
+.stat-block-num.sm { font-size: clamp(22px, 3vw, 34px); }
+.unit { font-size: 0.45em; font-weight: 700; margin-left: 4px; }
+.stat-block-sub { font-size: 12px; color: var(--text-muted); }
+
+/* ===========================
+   DASHBOARD GRID
+=========================== */
+.mid-row { display: grid; grid-template-columns: 1fr 1.4fr; gap: 14px; margin-bottom: 16px; }
+.chart-wrap { position: relative; height: 240px; }
+
+/* ===========================
+   RANKING ROWS
+=========================== */
+.ranking-row {
+  display: grid; grid-template-columns: 30px 1fr auto; align-items: center; gap: 10px;
+  padding: 9px 0; border-bottom: 1px solid var(--border);
+}
+.ranking-row:last-child { border-bottom: none; }
+.ranking-medal { font-size: 15px; text-align: center; }
+.rank-num { font-family: var(--mono); font-size: 11px; color: var(--text-dim); }
+.ranking-name-wrap { min-width: 0; }
+.ranking-name { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+.ranking-bar-wrap { margin-top: 5px; height: 4px; background: rgba(120,100,200,0.12); border-radius: 99px; overflow: hidden; }
+.ranking-bar { height: 100%; background: var(--grad-bar); border-radius: 99px; transform-origin: left; animation: grow .6s ease-out both; }
+@keyframes grow { from { transform: scaleX(0); } }
+.ranking-score { font-family: var(--mono); font-size: 11px; color: var(--text-muted); white-space: nowrap; }
+.breakdown { display: flex; flex-wrap: wrap; gap: 4px 10px; margin-top: 6px; font-size: 11px; color: var(--text-muted); }
+.breakdown span b { font-family: var(--mono); font-weight: 700; color: var(--text); margin-left: 2px; }
+
+.full-ranking .ranking-row { padding: 12px 0; }
+.full-ranking .ranking-name { font-size: 14px; }
+.full-ranking .ranking-score { font-size: 13px; color: var(--text); font-weight: 700; }
+
+.search-input {
+  background: var(--surface); border: 1px solid var(--border); color: var(--text);
+  font-size: 13px; padding: 8px 14px; border-radius: 99px; width: 220px; max-width: 100%;
+}
+.search-input::placeholder { color: var(--text-dim); }
+
+/* ===========================
+   LATEST WEEK
+=========================== */
+.latest-inner { display: grid; grid-template-columns: auto 1fr 1.3fr; gap: 32px; align-items: start; }
+.latest-time { font-size: 44px; font-weight: 800; letter-spacing: -0.04em; line-height: 1; }
+.latest-meta { font-size: 12px; color: var(--text-muted); margin-top: 6px; font-family: var(--mono); }
+.delta { display: inline-flex; align-items: center; gap: 4px; margin-top: 10px; font-size: 12px; font-weight: 600; font-family: var(--mono); padding: 3px 10px; border-radius: 99px; }
+.delta.up   { color: var(--green); background: color-mix(in srgb, var(--green) 12%, transparent); }
+.delta.down { color: var(--red);   background: color-mix(in srgb, var(--red) 12%, transparent); }
+.delta.flat { color: var(--text-muted); background: rgba(120,100,200,0.08); }
+.delta small { font-family: var(--font); font-weight: 500; opacity: .8; }
+.mini-label { font-size: 10px; font-weight: 600; letter-spacing: 0.1em; color: var(--text-dim); margin-bottom: 8px; }
+
+/* ===========================
+   LIST ROWS
+=========================== */
+.artist-list { display: flex; flex-direction: column; gap: 6px; }
+.artist-row { display: flex; align-items: baseline; gap: 8px; font-size: 13px; font-weight: 500; min-width: 0; }
+.artist-row > span:last-child { min-width: 0; overflow-wrap: anywhere; }
+.artist-rank { font-family: var(--mono); font-size: 10px; color: var(--text-muted); width: 22px; flex-shrink: 0; }
+.track-artist { color: var(--text-muted); font-weight: 400; }
+
+/* ===========================
+   WEEKLY / ANNUAL
+=========================== */
+.card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+.data-card { padding: 20px; }
+.data-card-title { font-size: 20px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 4px; }
+.data-card-title .yr { font-size: 13px; color: var(--text-muted); font-weight: 500; margin-right: 6px; }
+.data-card-time { font-family: var(--mono); font-size: 12px; color: var(--green); }
+.data-card-divider { border: none; border-top: 1px solid var(--border); margin: 14px 0 12px; }
+.data-card.is-latest { border-color: var(--accent-a); }
+.badge { font-size: 10px; font-weight: 700; letter-spacing: .08em; color: #fff; background: var(--grad); padding: 2px 8px; border-radius: 99px; margin-left: 6px; vertical-align: middle; }
+
+/* ===========================
+   LIVE
+=========================== */
+.live-grid { display: flex; flex-direction: column; gap: 8px; }
+.live-card { border-radius: 14px; padding: 14px 24px; display: grid; grid-template-columns: 110px 1fr; align-items: center; gap: 20px; }
+.live-card-left { border-right: 1px solid var(--border); padding-right: 20px; }
+.live-card-year { font-family: var(--mono); font-size: 10px; font-weight: 700; letter-spacing: 0.1em; color: var(--accent-a); margin-bottom: 2px; }
+.live-card-date { font-family: var(--mono); font-size: 12px; color: var(--text-muted); }
+.live-card-artist { font-size: 15px; font-weight: 700; margin-bottom: 2px; }
+.live-card-name { font-size: 12px; color: var(--text-muted); }
+.year-divider { font-family: var(--mono); font-size: 11px; letter-spacing: .12em; color: var(--text-muted); margin: 18px 4px 4px; display: flex; gap: 10px; align-items: center; }
+.year-divider::after { content: ""; flex: 1; border-top: 1px solid var(--border); }
+.year-divider:first-child { margin-top: 0; }
+
+/* ===========================
+   FILTER
+=========================== */
+.filter-bar { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--text-muted); flex-wrap: wrap; }
+.filter-bar select {
+  background: var(--surface); border: 1px solid var(--border); color: var(--text);
+  font-size: 13px; padding: 7px 14px; border-radius: 99px; cursor: pointer;
+}
+.count-chip { font-family: var(--mono); font-size: 12px; color: var(--text-muted); }
+
+/* ===========================
+   STATES
+=========================== */
+.skel {
+  display: block; border-radius: 8px;
+  background: linear-gradient(90deg, var(--skel-a) 25%, var(--skel-b) 50%, var(--skel-a) 75%);
+  background-size: 200% 100%; animation: shimmer 1.3s infinite linear;
+}
+@keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+.skel-num  { height: 44px; width: 70%; margin-bottom: 10px; }
+.skel-line { height: 14px; margin: 10px 0; }
+.skel-card { height: 180px; border-radius: var(--radius); }
+.empty { text-align: center; color: var(--text-muted); font-size: 13px; padding: 28px 12px; }
+.error-banner {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  background: color-mix(in srgb, var(--red) 10%, var(--surface-solid));
+  border: 1px solid color-mix(in srgb, var(--red) 35%, transparent);
+  border-radius: 14px; padding: 12px 16px; margin-bottom: 16px; font-size: 13px;
+}
+.error-banner button { background: var(--grad); color: #fff; border: none; border-radius: 99px; padding: 6px 14px; font-size: 12px; font-weight: 600; cursor: pointer; }
+
+/* ===========================
+   RESPONSIVE
+=========================== */
+@media (max-width: 900px) {
+  .mid-row { grid-template-columns: 1fr; }
+  .latest-inner { grid-template-columns: 1fr 1fr; gap: 20px; }
+  .latest-inner > :first-child { grid-column: 1 / -1; }
+  .stat-row.three { grid-template-columns: 1fr 1fr; }
+  .stat-row.three .stat-block:first-child { grid-column: 1 / -1; }
+}
+@media (max-width: 680px) {
+  .topnav { padding: 0 16px; height: 54px; }
+  .content { padding: 20px 16px calc(96px + env(safe-area-inset-bottom)); }
+  /* スマホは下部タブバー */
+  .tabs {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 100;
+    display: grid; grid-template-columns: repeat(5, 1fr); gap: 2px;
+    padding: 6px 6px calc(6px + env(safe-area-inset-bottom));
+    background: var(--nav-bg);
+    backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+    border-top: 1px solid var(--border);
+  }
+  .tab { flex-direction: column; gap: 3px; padding: 6px 0; font-size: 10px; border-radius: 12px; justify-content: center; }
+  .tab-icon { display: block; font-size: 18px; line-height: 1; }
+  .tab[aria-current="page"] { background: rgba(120,100,200,0.14); color: var(--text); }
+  .section-header h2 { font-size: 24px; }
+  .stat-row, .stat-row.three { grid-template-columns: 1fr; }
+  .card { padding: 18px; }
+  .latest-inner { grid-template-columns: 1fr; }
+  .latest-time { font-size: 38px; }
+  .chart-wrap { height: 200px; }
+  .live-card { grid-template-columns: 1fr; gap: 8px; padding: 14px 16px; }
+  .live-card-left { border-right: none; border-bottom: 1px solid var(--border); padding: 0 0 8px; display: flex; gap: 10px; align-items: baseline; }
+  .info-body { width: 220px; }
+  .search-input { width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+</style>
 </head>
 <body>
 
-<!-- TOP NAV -->
 <header class="topnav">
-    <div class="topnav-left">
-        <span class="topnav-icon">♫</span>
-        <span class="topnav-title">My Music Archive</span>
-    </div>
-    <nav class="topnav-right">
-        <button class="nav-pill active" onclick="showSection('dashboard', this)">Dashboard</button>
-        <button class="nav-pill" onclick="showSection('weekly', this)">Weekly</button>
-        <button class="nav-pill" onclick="showSection('annual', this)">Annual</button>
-        <button class="nav-pill" onclick="showSection('live', this)">Live</button>
-        <button class="theme-btn" onclick="toggleTheme()" title="テーマ切替">☀</button>
+  <a class="brand" href="#dashboard">
+    <span class="brand-icon grad-text" aria-hidden="true">♫</span>
+    <span>My Music Archive</span>
+  </a>
+  <div class="topnav-right">
+    <nav class="tabs" aria-label="セクション">
+      <a class="tab" href="#dashboard" data-section="dashboard"><span class="tab-icon" aria-hidden="true">🏠</span>Home</a>
+      <a class="tab" href="#ranking"   data-section="ranking"><span class="tab-icon" aria-hidden="true">👑</span>Ranking</a>
+      <a class="tab" href="#weekly"    data-section="weekly"><span class="tab-icon" aria-hidden="true">📅</span>Weekly</a>
+      <a class="tab" href="#annual"    data-section="annual"><span class="tab-icon" aria-hidden="true">🏆</span>Annual</a>
+      <a class="tab" href="#live"      data-section="live"><span class="tab-icon" aria-hidden="true">🎫</span>Live</a>
     </nav>
+    <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" aria-label="テーマを切り替え">🌙</button>
+  </div>
 </header>
 
 <div class="page-bg">
-    <main class="content">
+<main class="content">
 
-        <!-- ===== DASHBOARD ===== -->
-        <section id="dashboard">
+  <div id="errorBanner" class="error-banner hidden" role="alert">
+    <span>⚠ データを読み込めませんでした。通信状況を確認してください。</span>
+    <button onclick="loadData()">再試行</button>
+  </div>
 
-            <!-- 上段：合計＋今年 -->
-            <div class="top-row">
-                <div class="stat-block">
-                    <div class="stat-block-label">TOTAL LISTENING TIME</div>
-                    <div id="totalMinutes" class="stat-block-num grad-text">—</div>
-                    <div id="totalDays" class="stat-block-sub">計算中...</div>
-                </div>
-                <div class="stat-block">
-                    <div class="stat-block-label">2026 MINUTES</div>
-                    <div id="year2026Minutes" class="stat-block-num grad-text">—</div>
-                    <div class="stat-block-sub">2026年の合計再生時間</div>
-                </div>
-                <div class="stat-block">
-                    <div class="stat-block-label">MOST SEEN ARTIST</div>
-                    <div id="mostSeenArtist" class="stat-block-num grad-text" style="font-size:clamp(20px,3vw,36px)">—</div>
-                    <div id="mostSeenCount" class="stat-block-sub">0回</div>
-                </div>
-            </div>
+  <!-- ===== DASHBOARD ===== -->
+  <section id="dashboard">
+    <div class="stat-row">
+      <div class="stat-block">
+        <div class="stat-block-label">TOTAL LISTENING</div>
+        <div id="totalMinutes" class="stat-block-num grad-text"><span class="skel skel-num"></span></div>
+        <div id="totalDays" class="stat-block-sub">全期間の合計再生時間</div>
+      </div>
+      <div class="stat-block">
+        <div class="stat-block-label" id="thisYearLabel">THIS YEAR</div>
+        <div id="thisYearMinutes" class="stat-block-num grad-text"><span class="skel skel-num"></span></div>
+        <div id="thisYearSub" class="stat-block-sub">今年の合計再生時間</div>
+      </div>
+    </div>
 
-            <!-- 中段：アーティストランキング＋チャート -->
-            <div class="mid-row">
-                <div class="card ranking-card">
-                    <div class="card-label">ALL-TIME ARTIST RANKING</div>
-                    <div id="artistRanking"></div>
-                </div>
-                <div class="card chart-card">
-                    <div class="card-label">WEEKLY TREND <span style="opacity:.5;font-size:11px;">直近10週</span></div>
-                    <canvas id="weeklyChart"></canvas>
-                </div>
-            </div>
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-head">
+        <div class="card-label">LATEST WEEK</div>
+        <a class="more-link" href="#weekly">週ごとの記録 →</a>
+      </div>
+      <div id="latestWeek">
+        <span class="skel skel-line" style="width:40%"></span>
+        <span class="skel skel-line" style="width:70%"></span>
+        <span class="skel skel-line" style="width:55%"></span>
+      </div>
+    </div>
 
-            <!-- 下段：Latest Week -->
-            <div class="card latest-card">
-                <div class="card-label">LATEST WEEK</div>
-                <div id="latestWeek"></div>
-            </div>
+    <div class="mid-row">
+      <div class="card">
+        <div class="card-head">
+          <div class="card-label">ARTIST RANKING<span class="label-sub">TOP 5</span></div>
+          <a class="more-link" href="#ranking">すべて見る →</a>
+        </div>
+        <div id="artistRankingTop">
+          <span class="skel skel-line"></span><span class="skel skel-line"></span>
+          <span class="skel skel-line"></span><span class="skel skel-line"></span>
+          <span class="skel skel-line"></span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div class="card-label" id="chartLabel">WEEKLY TREND</div></div>
+        <div class="chart-wrap"><canvas id="weeklyChart" aria-label="週ごとの再生時間グラフ" role="img"></canvas></div>
+      </div>
+    </div>
+  </section>
 
-        </section>
+  <!-- ===== RANKING ===== -->
+  <section id="ranking" class="hidden">
+    <div class="section-header">
+      <div>
+        <h2>Artist Ranking</h2>
+        <p class="section-sub">全期間のアーティストランキング</p>
+      </div>
+      <div class="filter-bar">
+        <span id="rankingCount" class="count-chip"></span>
+        <input id="rankingSearch" class="search-input" type="search" placeholder="アーティストを検索" oninput="renderFullRanking()" aria-label="アーティストを検索">
+        <details class="info">
+          <summary>ⓘ 集計方法</summary>
+          <div class="info-body">
+            <b>週間TOP</b> 1位3pt・2位2pt・3位1pt<br>
+            <b>年間TOP</b> 1位5pt〜5位1pt<br>
+            <b>リピート曲</b> 1曲につき+1pt<br>
+            <b>ライブ参戦</b> 1回につき+1pt
+          </div>
+        </details>
+      </div>
+    </div>
+    <div class="card full-ranking">
+      <div id="artistRankingFull">
+        <span class="skel skel-line"></span><span class="skel skel-line"></span><span class="skel skel-line"></span>
+      </div>
+    </div>
+  </section>
 
-        <!-- ===== WEEKLY ===== -->
-        <section id="weekly" class="hidden">
-            <div class="section-header">
-                <h2>Weekly History</h2>
-                <p class="section-sub">週ごとの記録</p>
-            </div>
-            <div id="weeklyList" class="card-grid"></div>
-        </section>
+  <!-- ===== WEEKLY ===== -->
+  <section id="weekly" class="hidden">
+    <div class="section-header">
+      <div>
+        <h2>Weekly History</h2>
+        <p class="section-sub">週ごとの記録</p>
+      </div>
+      <div class="filter-bar">
+        <span id="weeklyCount" class="count-chip"></span>
+        <select id="weeklyYearFilter" aria-label="年で絞り込み" onchange="renderWeekly()">
+          <option value="all">すべての年</option>
+        </select>
+      </div>
+    </div>
+    <div id="weeklyList" class="card-grid">
+      <span class="skel skel-card"></span><span class="skel skel-card"></span><span class="skel skel-card"></span>
+    </div>
+  </section>
 
-        <!-- ===== ANNUAL ===== -->
-        <section id="annual" class="hidden">
-            <div class="section-header">
-                <h2>Annual History</h2>
-                <p class="section-sub">年間サマリー</p>
-            </div>
-            <div id="annualList" class="card-grid"></div>
-        </section>
+  <!-- ===== ANNUAL ===== -->
+  <section id="annual" class="hidden">
+    <div class="section-header">
+      <div>
+        <h2>Annual History</h2>
+        <p class="section-sub">年間サマリー</p>
+      </div>
+    </div>
+    <div id="annualList" class="card-grid">
+      <span class="skel skel-card"></span><span class="skel skel-card"></span>
+    </div>
+  </section>
 
-        <!-- ===== LIVE ===== -->
-        <section id="live" class="hidden">
-            <div class="section-header">
-                <h2>Live Archive</h2>
-                <p class="section-sub">参加したライブの記録</p>
-            </div>
-            <div class="filter-bar">
-                <label>年でフィルタ：</label>
-                <select id="liveYearFilter" onchange="filterLive()">
-                    <option value="all">すべて</option>
-                </select>
-            </div>
-            <div id="liveList"></div>
-        </section>
+  <!-- ===== LIVE ===== -->
+  <section id="live" class="hidden">
+    <div class="section-header">
+      <div>
+        <h2>Live Archive</h2>
+        <p class="section-sub">参加したライブの記録</p>
+      </div>
+      <div class="filter-bar">
+        <span id="liveCount" class="count-chip"></span>
+        <select id="liveYearFilter" aria-label="年で絞り込み" onchange="renderLive()">
+          <option value="all">すべての年</option>
+        </select>
+      </div>
+    </div>
 
-    </main>
+    <!-- Most Seen はダッシュボードからこちらへ移動 -->
+    <div class="stat-row three">
+      <div class="stat-block">
+        <div class="stat-block-label">MOST SEEN ARTIST</div>
+        <div id="mostSeenArtist" class="stat-block-num sm grad-text">—</div>
+        <div id="mostSeenCount" class="stat-block-sub"></div>
+      </div>
+      <div class="stat-block">
+        <div class="stat-block-label">TOTAL SHOWS</div>
+        <div id="liveTotal" class="stat-block-num sm grad-text">—</div>
+        <div class="stat-block-sub">通算公演数</div>
+      </div>
+      <div class="stat-block">
+        <div class="stat-block-label" id="liveThisYearLabel">THIS YEAR</div>
+        <div id="liveThisYear" class="stat-block-num sm grad-text">—</div>
+        <div class="stat-block-sub">今年の公演数</div>
+      </div>
+    </div>
+
+    <div id="liveList">
+      <span class="skel skel-line" style="height:60px"></span>
+      <span class="skel skel-line" style="height:60px"></span>
+    </div>
+  </section>
+
+</main>
 </div>
 
-<script src="script.js"></script>
+<script>
+/* ===========================
+   CONFIG
+=========================== */
+const BASE = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSPJOnhUFFyWx7838ZfQeAY1gemOhCvO_leTg8hwWMePG2kZ08_UnIQE2bHKTU18RkR5P5Ow5oHV5Xf/pub";
+const weeklyUrl = `${BASE}?gid=0&single=true&output=csv`;
+const yearUrl   = `${BASE}?gid=575136021&single=true&output=csv`;
+const liveUrl   = `${BASE}?gid=1117584699&single=true&output=csv`;
+
+const CHART_WEEKS = 5;                                // グラフの週数。ここを変えるとラベルも自動で変わる
+const DASH_RANK   = 5;                                // ダッシュボードに出すランキング件数
+const THIS_YEAR   = String(new Date().getFullYear()); // 「2026」の直書きをやめて自動化
+const SECTIONS    = ["dashboard", "ranking", "weekly", "annual", "live"];
+
+let weeklyData = [], yearlyData = [], liveData = [];
+let rankingAll = [];
+let chartInst = null;
+
+/* ===========================
+   UTIL
+=========================== */
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c =>
+  ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
+const fmt = n => Number(n).toLocaleString("ja-JP");
+const $ = id => document.getElementById(id);
+
+/* ===========================
+   FETCH
+=========================== */
+async function loadData() {
+  $("errorBanner").classList.add("hidden");
+  try {
+    const [w, y, l] = await Promise.all([weeklyUrl, yearUrl, liveUrl].map(u =>
+      fetch(u).then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.text(); })
+    ));
+    weeklyData = parseWeekly(w);
+    yearlyData = parseYear(y);
+    liveData   = parseLive(l);
+    renderAll();
+  } catch (err) {
+    console.error("データ取得エラー:", err);
+    $("errorBanner").classList.remove("hidden");
+  }
+}
+
+/* ===========================
+   PARSE（「,」を含む曲名・ライブ名でも列がズレないCSVパーサー）
+=========================== */
+function parseCSV(text) {
+  const rows = [];
+  let row = [], field = "", inQuotes = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (inQuotes) {
+      if (c === '"') { if (text[i + 1] === '"') { field += '"'; i++; } else inQuotes = false; }
+      else field += c;
+    } else if (c === '"') inQuotes = true;
+    else if (c === ",") { row.push(field); field = ""; }
+    else if (c === "\n") { row.push(field); rows.push(row); row = []; field = ""; }
+    else if (c !== "\r") field += c;
+  }
+  if (field || row.length) { row.push(field); rows.push(row); }
+  return rows.slice(1).map(r => r.map(s => s.trim())).filter(r => r.some(Boolean));
+}
+const num = v => Number(String(v || "").replace(/,/g, "")) || 0;
+
+function parseWeekly(csv) {
+  return parseCSV(csv).map(c => ({
+    year: c[0] || "", week: c[1] || "", minutes: num(c[2]),
+    tops: [c[3], c[4], c[5]].filter(Boolean),
+    repeats: [[c[6], c[7]], [c[8], c[9]], [c[10], c[11]]]
+      .filter(([t, a]) => t || a)
+      .map(([t, a]) => ({ title: t || "", artist: a || "" }))
+  })).filter(w => w.year);
+}
+function parseYear(csv) {
+  return parseCSV(csv).map(c => ({
+    year: c[0] || "", minutes: num(c[1]), songs: num(c[2]),
+    artists: [c[3], c[4], c[5], c[6], c[7]].filter(Boolean)
+  })).filter(y => y.year);
+}
+function parseLive(csv) {
+  return parseCSV(csv).map(c => ({
+    year: c[0] || "", date: c[1] || "", artist: c[2] || "", live: c[3] || ""
+  })).filter(l => l.year || l.artist);
+}
+
+/* ===========================
+   RENDER ALL
+=========================== */
+function renderAll() {
+  fillYearFilter("weeklyYearFilter", weeklyData);
+  fillYearFilter("liveYearFilter", liveData);
+  rankingAll = calcArtistRanking();
+  updateDashboard();
+  renderFullRanking();
+  renderWeekly();
+  renderAnnual();
+  renderLiveStats();
+  renderLive();
+  renderChart();
+}
+
+function fillYearFilter(id, data) {
+  const select = $(id);
+  const current = select.value;
+  select.length = 1;
+  [...new Set(data.map(d => d.year).filter(Boolean))].sort((a, b) => b - a)
+    .forEach(y => select.add(new Option(`${y}年`, y)));
+  select.value = [...select.options].some(o => o.value === current) ? current : "all";
+}
+
+/* ===========================
+   ARTIST RANKING（内訳つき・同点は同順位）
+=========================== */
+function calcArtistRanking() {
+  const map = {};
+  const add = (name, key, pt) => {
+    const n = (name || "").trim();
+    if (!n) return;
+    map[n] ??= { name: n, weekly: 0, annual: 0, repeat: 0, live: 0, total: 0 };
+    map[n][key] += pt; map[n].total += pt;
+  };
+  weeklyData.forEach(w => {
+    w.tops.forEach((a, i) => add(a, "weekly", 3 - i));
+    w.repeats.forEach(r => add(r.artist, "repeat", 1));
+  });
+  yearlyData.forEach(y => y.artists.forEach((a, i) => add(a, "annual", 5 - i)));
+  liveData.forEach(l => add(l.artist, "live", 1));
+
+  const list = Object.values(map).sort((a, b) => b.total - a.total || a.name.localeCompare(b.name, "ja"));
+  list.forEach((r, i) => { r.rank = i > 0 && r.total === list[i - 1].total ? list[i - 1].rank : i + 1; });
+  return list;
+}
+
+function rankingRowsHtml(list, withBreakdown) {
+  const topScore = rankingAll[0]?.total || 1;
+  const medals = { 1: "🥇", 2: "🥈", 3: "🥉" };
+  return list.map((r, i) => `
+    <div class="ranking-row">
+      <span class="ranking-medal">${medals[r.rank] ?? `<span class="rank-num">${r.rank}</span>`}</span>
+      <div class="ranking-name-wrap">
+        <span class="ranking-name" title="${esc(r.name)}">${esc(r.name)}</span>
+        <div class="ranking-bar-wrap"><div class="ranking-bar" style="width:${Math.round(r.total / topScore * 100)}%;animation-delay:${Math.min(i, 15) * 30}ms"></div></div>
+        ${withBreakdown ? `<div class="breakdown">
+          ${r.weekly ? `<span>週間<b>${r.weekly}</b></span>` : ""}
+          ${r.annual ? `<span>年間<b>${r.annual}</b></span>` : ""}
+          ${r.repeat ? `<span>リピート<b>${r.repeat}</b></span>` : ""}
+          ${r.live   ? `<span>ライブ<b>${r.live}</b></span>` : ""}
+        </div>` : ""}
+      </div>
+      <span class="ranking-score">${r.total}pt</span>
+    </div>`).join("");
+}
+
+function renderFullRanking() {
+  const q = $("rankingSearch").value.trim().toLowerCase();
+  const list = q ? rankingAll.filter(r => r.name.toLowerCase().includes(q)) : rankingAll;
+  $("rankingCount").textContent = `${list.length}組`;
+  $("artistRankingFull").innerHTML = list.length
+    ? rankingRowsHtml(list, true)
+    : `<div class="empty">${q ? "該当するアーティストがいません" : "まだデータがありません"}</div>`;
+}
+
+/* ===========================
+   DASHBOARD
+=========================== */
+function updateDashboard() {
+  /* 合計：年間シートに記録がある年は、週次の同じ年を足さない（二重計上防止） */
+  const annualYears = new Set(yearlyData.filter(y => y.minutes > 0).map(y => y.year));
+  const totalMin =
+    yearlyData.reduce((a, b) => a + b.minutes, 0) +
+    weeklyData.filter(w => !annualYears.has(w.year)).reduce((a, b) => a + b.minutes, 0);
+  $("totalMinutes").innerHTML = `${fmt(totalMin)}<span class="unit">分</span>`;
+  const days = Math.floor(totalMin / 1440), hours = Math.floor((totalMin % 1440) / 60);
+  $("totalDays").textContent = `約 ${days} 日 ${hours} 時間ぶん`;
+
+  /* 今年 */
+  $("thisYearLabel").textContent = `${THIS_YEAR} LISTENING`;
+  const yw = weeklyData.filter(w => w.year === THIS_YEAR);
+  const minYear = yw.reduce((a, b) => a + b.minutes, 0);
+  if (minYear > 0) {
+    $("thisYearMinutes").innerHTML = `${fmt(minYear)}<span class="unit">分</span>`;
+    $("thisYearSub").textContent = `${yw.length}週ぶん · 週平均 ${fmt(Math.round(minYear / yw.length))}分`;
+  } else {
+    $("thisYearMinutes").textContent = "—";
+    $("thisYearSub").textContent = "まだ記録がありません";
+  }
+
+  /* ランキング TOP5 */
+  $("artistRankingTop").innerHTML = rankingAll.length
+    ? rankingRowsHtml(rankingAll.slice(0, DASH_RANK), false)
+    : `<div class="empty">まだデータがありません</div>`;
+
+  /* Latest Week（先週比つき） */
+  const latest = weeklyData.at(-1), prev = weeklyData.at(-2);
+  if (!latest) { $("latestWeek").innerHTML = `<div class="empty">まだ記録がありません</div>`; return; }
+  let deltaHtml = "";
+  if (prev) {
+    const d = latest.minutes - prev.minutes;
+    const cls = d > 0 ? "up" : d < 0 ? "down" : "flat";
+    const sign = d > 0 ? "▲" : d < 0 ? "▼" : "±";
+    deltaHtml = `<div class="delta ${cls}">${sign} ${fmt(Math.abs(d))}分 <small>先週比</small></div>`;
+  }
+  $("latestWeek").innerHTML = `
+    <div class="latest-inner">
+      <div>
+        <div class="latest-time grad-text">${fmt(latest.minutes)}<span class="unit">分</span></div>
+        <div class="latest-meta">${esc(latest.year)} / ${esc(latest.week)}</div>
+        ${deltaHtml}
+      </div>
+      <div><div class="mini-label">TOP ARTISTS</div>${artistListHtml(latest.tops)}</div>
+      <div><div class="mini-label">REPEAT TRACKS 🔁</div>${trackListHtml(latest.repeats)}</div>
+    </div>`;
+}
+
+function artistListHtml(list, marks) {
+  if (!list.length) return `<div class="track-artist" style="font-size:13px">—</div>`;
+  return `<div class="artist-list">${list.map((a, i) => `
+    <div class="artist-row"><span class="artist-rank">${marks ? marks[i] : "#" + (i + 1)}</span><span>${esc(a)}</span></div>`).join("")}</div>`;
+}
+function trackListHtml(list) {
+  if (!list.length) return `<div class="track-artist" style="font-size:13px">—</div>`;
+  return `<div class="artist-list">${list.map((r, i) => `
+    <div class="artist-row"><span class="artist-rank">#${i + 1}</span>
+      <span>${esc(r.title)}${r.artist ? ` <span class="track-artist">— ${esc(r.artist)}</span>` : ""}</span></div>`).join("")}</div>`;
+}
+
+/* ===========================
+   WEEKLY
+=========================== */
+function renderWeekly() {
+  const year = $("weeklyYearFilter").value;
+  const latest = weeklyData.at(-1);
+  const data = [...weeklyData].reverse().filter(w => year === "all" || w.year === year);
+  $("weeklyCount").textContent = `${data.length}週`;
+  $("weeklyList").innerHTML = data.length ? data.map(w => `
+    <article class="data-card ${w === latest ? "is-latest" : ""}">
+      <div class="data-card-title"><span class="yr">${esc(w.year)}</span>${esc(w.week)}${w === latest ? `<span class="badge">LATEST</span>` : ""}</div>
+      <div class="data-card-time">⏱ ${fmt(w.minutes)} 分</div>
+      <hr class="data-card-divider">
+      <div class="mini-label">TOP ARTISTS</div>
+      ${artistListHtml(w.tops)}
+      ${w.repeats.length ? `<hr class="data-card-divider"><div class="mini-label">REPEAT TRACKS</div>${trackListHtml(w.repeats)}` : ""}
+    </article>`).join("") : `<div class="empty">この年の記録はありません</div>`;
+}
+
+/* ===========================
+   ANNUAL
+=========================== */
+function renderAnnual() {
+  const marks = ["🥇", "🥈", "🥉", "4", "5"];
+  const data = [...yearlyData].reverse();
+  $("annualList").innerHTML = data.length ? data.map(y => `
+    <article class="data-card">
+      <div class="data-card-title">${esc(y.year)}</div>
+      <div class="data-card-time">⏱ ${fmt(y.minutes)} 分 · ${fmt(y.songs)} 曲</div>
+      <hr class="data-card-divider">
+      <div class="mini-label">TOP ARTISTS</div>
+      ${artistListHtml(y.artists, marks)}
+    </article>`).join("") : `<div class="empty">まだ記録がありません</div>`;
+}
+
+/* ===========================
+   LIVE
+=========================== */
+function renderLiveStats() {
+  const counts = {};
+  liveData.forEach(l => { if (l.artist) counts[l.artist] = (counts[l.artist] || 0) + 1; });
+  const max = Math.max(0, ...Object.values(counts));
+  const bests = Object.keys(counts).filter(k => counts[k] === max);   // 同数なら全員表示
+  $("mostSeenArtist").textContent = max ? bests.join(" / ") : "—";
+  $("mostSeenCount").textContent  = max ? `${max}回 参戦` : "まだ記録がありません";
+  $("liveTotal").innerHTML = `${fmt(liveData.length)}<span class="unit">公演</span>`;
+  $("liveThisYearLabel").textContent = `${THIS_YEAR} SHOWS`;
+  $("liveThisYear").innerHTML = `${fmt(liveData.filter(l => l.year === THIS_YEAR).length)}<span class="unit">公演</span>`;
+}
+
+function renderLive() {
+  const year = $("liveYearFilter").value;
+  const data = [...liveData].reverse().filter(l => year === "all" || l.year === year);
+  $("liveCount").textContent = `${data.length}公演`;
+  if (!data.length) { $("liveList").innerHTML = `<div class="empty">この年のライブ記録はありません</div>`; return; }
+
+  let html = `<div class="live-grid">`, lastYear = null;
+  data.forEach(l => {
+    if (year === "all" && l.year !== lastYear) {
+      html += `<div class="year-divider">${esc(l.year)} · ${data.filter(x => x.year === l.year).length}公演</div>`;
+      lastYear = l.year;
+    }
+    html += `
+      <article class="live-card">
+        <div class="live-card-left">
+          <div class="live-card-year">${esc(l.year)}</div>
+          <div class="live-card-date">${esc(l.date)}</div>
+        </div>
+        <div>
+          <div class="live-card-artist">${esc(l.artist)}</div>
+          <div class="live-card-name">${esc(l.live)}</div>
+        </div>
+      </article>`;
+  });
+  $("liveList").innerHTML = html + `</div>`;
+}
+
+/* ===========================
+   CHART（最新週をハイライト・平均表示）
+=========================== */
+function renderChart() {
+  if (typeof Chart === "undefined") return;
+  const recent = weeklyData.slice(-CHART_WEEKS);
+  const avg = recent.length ? Math.round(recent.reduce((a, b) => a + b.minutes, 0) / recent.length) : 0;
+  $("chartLabel").innerHTML = `WEEKLY TREND<span class="label-sub">直近${recent.length}週 · 平均 ${fmt(avg)}分</span>`;
+
+  if (chartInst) chartInst.destroy();
+  const isDark = document.body.classList.contains("dark");
+  const gridColor = isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.05)";
+  const textColor = isDark ? "#9a92bd" : "#6b6384";
+  const last = recent.length - 1;
+
+  chartInst = new Chart($("weeklyChart"), {
+    type: "bar",
+    data: {
+      labels: recent.map(w => w.week),
+      datasets: [{
+        data: recent.map(w => w.minutes),
+        backgroundColor: recent.map((_, i) => i === last ? "#a78bfa" : "rgba(167,139,250,0.28)"),
+        hoverBackgroundColor: "#38bdf8",
+        borderRadius: 8, borderSkipped: false, maxBarThickness: 48
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          displayColors: false,
+          callbacks: {
+            title: items => { const w = recent[items[0].dataIndex]; return `${w.year} / ${w.week}`; },
+            label: c => `${fmt(c.parsed.y)} 分`
+          }
+        }
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { color: textColor, maxRotation: 0, font: { family: "'Space Mono'", size: 10 } } },
+        y: { beginAtZero: true, grid: { color: gridColor }, border: { display: false },
+             ticks: { color: textColor, font: { family: "'Space Mono'", size: 10 }, callback: v => fmt(v) } }
+      }
+    }
+  });
+}
+
+/* ===========================
+   THEME（初期値はOSの設定に合わせる）
+=========================== */
+function applyTheme(dark) {
+  document.body.classList.toggle("dark", !!dark);
+  $("themeBtn").textContent = dark ? "☀" : "🌙";   // 押したら切り替わる先を表示
+  $("themeBtn").setAttribute("aria-label", dark ? "ライトモードにする" : "ダークモードにする");
+}
+function toggleTheme() {
+  applyTheme(!document.body.classList.contains("dark"));
+  renderChart();
+}
+
+/* ===========================
+   NAV（URLの#で管理 → リロード・戻るボタン・共有に対応）
+=========================== */
+function showSection() {
+  const id = SECTIONS.includes(location.hash.slice(1)) ? location.hash.slice(1) : "dashboard";
+  SECTIONS.forEach(s => $(s).classList.toggle("hidden", s !== id));
+  document.querySelectorAll(".tab").forEach(t =>
+    t.dataset.section === id ? t.setAttribute("aria-current", "page") : t.removeAttribute("aria-current"));
+  window.scrollTo({ top: 0 });
+}
+window.addEventListener("hashchange", showSection);
+
+/* ===========================
+   INIT
+=========================== */
+applyTheme(window.matchMedia?.("(prefers-color-scheme: dark)").matches);
+showSection();
+loadData();
+</script>
 </body>
 </html>
