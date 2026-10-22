@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>My Music Archive</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
@@ -99,7 +101,7 @@ button, select, input { font-family: inherit; }
 .eq.xs span { width: 2px; }
 
 /* ===========================
-   SPLASH（起動時のローディング画面）
+   SPLASH
 =========================== */
 .splash {
   position: fixed; inset: 0; z-index: 1000;
@@ -167,20 +169,19 @@ button, select, input { font-family: inherit; }
 .section-sub { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
 .grad-text { background: var(--grad); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
 
-/* ページ切り替え時のフェードイン（順番に少しずつ表示） */
 @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
 .enter .anim { animation: fadeUp .55s cubic-bezier(.2,.7,.3,1) both; animation-delay: calc(var(--i, 0) * 60ms); }
 
 /* ===========================
    CARD
 =========================== */
-.card, .stat-block, .data-card, .live-card {
+.card, .stat-block, .data-card, .ticket {
   background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
   backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
   box-shadow: var(--shadow);
-  transition: border-color .25s, box-shadow .25s;
+  transition: border-color .25s, box-shadow .25s, transform .25s;
 }
-.data-card:hover, .live-card:hover, .stat-block:hover {
+.data-card:hover, .ticket:hover, .stat-block:hover {
   border-color: color-mix(in srgb, var(--accent-a) 55%, transparent);
   box-shadow: 0 8px 30px rgba(120,100,200,0.16);
 }
@@ -226,6 +227,9 @@ button, select, input { font-family: inherit; }
 .mid-row { display: grid; grid-template-columns: 1fr 1.4fr; gap: 14px; margin-bottom: 16px; }
 .chart-wrap { position: relative; height: 240px; }
 
+/* Spotify */
+.spotify-frame { display: block; width: 100%; height: 352px; border: 0; border-radius: 12px; }
+
 /* ===========================
    RANKING ROWS
 =========================== */
@@ -249,13 +253,6 @@ button, select, input { font-family: inherit; }
 .full-ranking .ranking-row { padding: 12px 6px; }
 .full-ranking .ranking-name { font-size: 14px; }
 .full-ranking .ranking-score { font-size: 13px; color: var(--text); font-weight: 700; }
-.search-input {
-  background: var(--surface); border: 1px solid var(--border); color: var(--text);
-  font-size: 13px; padding: 8px 14px; border-radius: 99px; width: 220px; max-width: 100%;
-  transition: border-color .2s, box-shadow .2s;
-}
-.search-input:focus { outline: none; border-color: var(--accent-a); box-shadow: 0 0 0 3px rgba(167,139,250,0.2); }
-.search-input::placeholder { color: var(--text-dim); }
 
 /* ===========================
    LATEST WEEK
@@ -293,18 +290,49 @@ button, select, input { font-family: inherit; }
 .badge .eq span { background: #fff; }
 
 /* ===========================
-   LIVE
+   LIVE（チケット風カード）
 =========================== */
-.live-grid { display: flex; flex-direction: column; gap: 8px; }
-.live-card { border-radius: 14px; padding: 14px 24px; display: grid; grid-template-columns: 110px 1fr; align-items: center; gap: 20px; }
-.live-card-left { border-right: 1px solid var(--border); padding-right: 20px; }
-.live-card-year { font-family: var(--mono); font-size: 10px; font-weight: 700; letter-spacing: 0.1em; color: var(--accent-a); margin-bottom: 2px; }
-.live-card-date { font-family: var(--mono); font-size: 12px; color: var(--text-muted); }
-.live-card-artist { font-size: 15px; font-weight: 700; margin-bottom: 2px; }
-.live-card-name { font-size: 12px; color: var(--text-muted); }
-.year-divider { font-family: var(--mono); font-size: 11px; letter-spacing: .12em; color: var(--text-muted); margin: 18px 4px 4px; display: flex; gap: 10px; align-items: center; }
+.live-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); gap: 12px; }
+.year-divider {
+  grid-column: 1 / -1;
+  font-family: var(--mono); font-size: 11px; letter-spacing: .12em; color: var(--text-muted);
+  margin: 14px 4px 0; display: flex; gap: 10px; align-items: center;
+}
 .year-divider::after { content: ""; flex: 1; border-top: 1px solid var(--border); }
 .year-divider:first-child { margin-top: 0; }
+
+.ticket { display: grid; grid-template-columns: 82px 1fr; overflow: hidden; border-radius: 16px; }
+.ticket:hover { transform: translateY(-3px); }
+.ticket-stub {
+  background: var(--grad); color: #fff; text-align: center;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: 14px 6px;
+}
+.ticket-month { font-family: var(--mono); font-size: 10px; font-weight: 700; letter-spacing: .16em; opacity: .9; }
+.ticket-day { font-size: 32px; font-weight: 800; line-height: 1.05; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+.ticket-sub { font-family: var(--mono); font-size: 9px; letter-spacing: .08em; opacity: .85; margin-top: 3px; }
+.ticket-raw { font-family: var(--mono); font-size: 11px; margin-top: 4px; overflow-wrap: anywhere; }
+.ticket-body {
+  position: relative; min-width: 0;
+  padding: 14px 18px; border-left: 2px dashed var(--border);
+  display: flex; flex-direction: column; justify-content: center; gap: 4px;
+}
+/* チケットの切り込み */
+.ticket-body::before, .ticket-body::after {
+  content: ""; position: absolute; left: -9px; width: 16px; height: 16px; border-radius: 50%;
+  background: var(--surface-solid); border: 1px solid var(--border);
+}
+.ticket-body::before { top: -9px; }
+.ticket-body::after  { bottom: -9px; }
+.ticket-artist { font-size: 15px; font-weight: 700; overflow-wrap: anywhere; }
+.ticket-name { font-size: 12px; color: var(--text-muted); line-height: 1.5; overflow-wrap: anywhere; }
+.ticket-meta { margin-top: 4px; }
+.ticket-tag {
+  display: inline-block; font-family: var(--mono); font-size: 10px; font-weight: 700;
+  padding: 2px 9px; border-radius: 99px;
+  color: var(--accent-a); background: rgba(167,139,250,0.14);
+}
+.ticket-tag.first { color: var(--text-muted); background: rgba(120,100,200,0.08); }
 
 /* ===========================
    FILTER
@@ -348,7 +376,12 @@ button, select, input { font-family: inherit; }
   .stat-row.three .stat-block:first-child { grid-column: 1 / -1; }
 }
 @media (max-width: 680px) {
-  .topnav { padding: 0 16px; height: 54px; }
+  .topnav {
+    padding: 0 16px; height: 54px;
+    /* 子のタブバーを画面下に固定するため、スマホではぼかしを外す */
+    backdrop-filter: none; -webkit-backdrop-filter: none;
+    background: var(--surface-solid);
+  }
   .content { padding: 20px 16px calc(96px + env(safe-area-inset-bottom)); }
   .tabs {
     position: fixed; left: 0; right: 0; bottom: 0; z-index: 100;
@@ -368,10 +401,10 @@ button, select, input { font-family: inherit; }
   .latest-inner { grid-template-columns: 1fr; }
   .latest-time { font-size: 38px; }
   .chart-wrap { height: 200px; }
-  .live-card { grid-template-columns: 1fr; gap: 8px; padding: 14px 16px; }
-  .live-card-left { border-right: none; border-bottom: 1px solid var(--border); padding: 0 0 8px; display: flex; gap: 10px; align-items: baseline; }
+  .ticket { grid-template-columns: 72px 1fr; }
+  .ticket-day { font-size: 28px; }
+  .ticket-body { padding: 12px 14px; }
   .info-body { width: 220px; }
-  .search-input { width: 100%; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
@@ -380,8 +413,13 @@ button, select, input { font-family: inherit; }
 </head>
 <body class="is-splash">
 <script>
-  // テーマを最初に決めて、ローディング画面が一瞬白く光るのを防ぐ
-  if (window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches) document.body.classList.add("dark");
+  // 保存されたテーマ → なければOSの設定。ローディング画面が一瞬白く光るのを防ぐ
+  (function () {
+    var saved = null;
+    try { saved = localStorage.getItem("theme"); } catch (e) {}
+    var preferDark = window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches;
+    if (saved === "dark" || (!saved && preferDark)) document.body.classList.add("dark");
+  })();
 </script>
 
 <!-- ===== SPLASH ===== -->
@@ -450,7 +488,7 @@ button, select, input { font-family: inherit; }
       <div class="card anim">
         <div class="card-head">
           <div class="card-label">ARTIST RANKING<span class="label-sub">TOP 5</span></div>
-          <a class="more-link" href="#ranking">すべて見る <span class="arrow">→</span></a>
+          <a class="more-link" href="#ranking">TOP10を見る <span class="arrow">→</span></a>
         </div>
         <div id="artistRankingTop">
           <span class="skel skel-line"></span><span class="skel skel-line"></span>
@@ -463,6 +501,16 @@ button, select, input { font-family: inherit; }
         <div class="chart-wrap"><canvas id="weeklyChart" aria-label="週ごとの再生時間グラフ" role="img"></canvas></div>
       </div>
     </div>
+
+    <!-- Spotify（CONFIG の SPOTIFY_URL を入れると表示） -->
+    <div id="spotifyCard" class="card anim hidden">
+      <div class="card-head">
+        <div class="card-label">🎧 MY PLAYLIST</div>
+        <a id="spotifyOpen" class="more-link" target="_blank" rel="noopener">Spotifyで開く <span class="arrow">↗</span></a>
+      </div>
+      <iframe id="spotifyFrame" class="spotify-frame" title="Spotifyプレイリスト" loading="lazy"
+        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe>
+    </div>
   </section>
 
   <!-- ===== RANKING ===== -->
@@ -470,18 +518,17 @@ button, select, input { font-family: inherit; }
     <div class="section-header anim">
       <div>
         <h2>Artist Ranking</h2>
-        <p class="section-sub">全期間のアーティストランキング</p>
+        <p class="section-sub">全期間のアーティストランキング TOP10</p>
       </div>
       <div class="filter-bar">
-        <span id="rankingCount" class="count-chip"></span>
-        <input id="rankingSearch" class="search-input" type="search" placeholder="アーティストを検索" oninput="renderFullRanking()" aria-label="アーティストを検索">
         <details class="info">
           <summary>ⓘ 集計方法</summary>
           <div class="info-body">
             <b>週間TOP</b> 1位3pt・2位2pt・3位1pt<br>
             <b>年間TOP</b> 1位5pt〜5位1pt<br>
             <b>リピート曲</b> 1曲につき+1pt<br>
-            <b>ライブ参戦</b> 1回につき+1pt
+            <b>ライブ参戦</b> 1回につき+1pt<br>
+            同点は同じ順位として表示します
           </div>
         </details>
       </div>
@@ -549,7 +596,7 @@ button, select, input { font-family: inherit; }
       <div class="stat-block anim">
         <div class="stat-block-label">TOTAL SHOWS</div>
         <div id="liveTotal" class="stat-block-num sm grad-text">—</div>
-        <div class="stat-block-sub">通算公演数</div>
+        <div id="liveTotalSub" class="stat-block-sub">通算公演数</div>
       </div>
       <div class="stat-block anim">
         <div class="stat-block-label" id="liveThisYearLabel">THIS YEAR</div>
@@ -559,8 +606,8 @@ button, select, input { font-family: inherit; }
     </div>
 
     <div id="liveList">
-      <span class="skel skel-line" style="height:60px"></span>
-      <span class="skel skel-line" style="height:60px"></span>
+      <span class="skel skel-line" style="height:80px"></span>
+      <span class="skel skel-line" style="height:80px"></span>
     </div>
   </section>
 
@@ -576,9 +623,14 @@ const weeklyUrl = `${BASE}?gid=0&single=true&output=csv`;
 const yearUrl   = `${BASE}?gid=575136021&single=true&output=csv`;
 const liveUrl   = `${BASE}?gid=1117584699&single=true&output=csv`;
 
-const CHART_WEEKS  = 5;                               // グラフの週数（ラベルも自動で連動）
-const DASH_RANK    = 5;                               // ダッシュボードのランキング件数
-const SPLASH_MIN   = 1200;                            // ローディング画面を最低何ミリ秒見せるか
+// ↓ 自分のSpotifyプレイリストのURLを "" の中に貼る（空のままならカードは非表示）
+//   例: "https://open.spotify.com/playlist/xxxxxxxxxxxxxxxxxxxxxx?si=..."
+const SPOTIFY_URL = "";
+
+const CHART_WEEKS  = 5;      // グラフの週数
+const DASH_RANK    = 5;      // ダッシュボードのランキング件数
+const RANK_LIMIT   = 10;     // Rankingページの表示順位（TOP10）
+const SPLASH_MIN   = 1200;   // ローディング画面を最低何ミリ秒見せるか
 const THIS_YEAR    = String(new Date().getFullYear());
 const SECTIONS     = ["dashboard", "ranking", "weekly", "annual", "live"];
 const REDUCED      = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
@@ -609,8 +661,7 @@ async function hideSplash() {
 }
 
 /* ===========================
-   カウントアップ（数字が0から増えていく演出）
-   data-count に目標値、data-unit に単位を入れておくと動く
+   カウントアップ
 =========================== */
 function setCount(el, value, unit = "") {
   el.dataset.count = value;
@@ -635,13 +686,13 @@ function runCounters(root) {
 }
 
 /* ===========================
-   ページ表示時の演出（フェードイン＋カウントアップ）
+   ページ表示時の演出
 =========================== */
 function enterSection(id) {
   const sec = $(id);
   sec.querySelectorAll(".anim").forEach((el, i) => el.style.setProperty("--i", Math.min(i, 14)));
   sec.classList.remove("enter");
-  void sec.offsetWidth;          // アニメーションを最初から再生させるためのリセット
+  void sec.offsetWidth;
   sec.classList.add("enter");
   runCounters(sec);
 }
@@ -668,9 +719,10 @@ async function loadData() {
 }
 
 /* ===========================
-   PARSE（「,」を含む曲名・ライブ名でも列がズレないCSVパーサー）
+   PARSE
 =========================== */
 function parseCSV(text) {
+  text = text.replace(/^\uFEFF/, "");   // 先頭のBOMを除去
   const rows = [];
   let row = [], field = "", inQuotes = false;
   for (let i = 0; i < text.length; i++) {
@@ -704,9 +756,13 @@ function parseYear(csv) {
   })).filter(y => y.year);
 }
 function parseLive(csv) {
+  const seen = {};   // アーティストごとの参戦回数（シートが古い順に並んでいる前提）
   return parseCSV(csv).map(c => ({
     year: c[0] || "", date: c[1] || "", artist: c[2] || "", live: c[3] || ""
-  })).filter(l => l.year || l.artist);
+  })).filter(l => l.year || l.artist).map(l => {
+    if (l.artist) seen[l.artist] = (seen[l.artist] || 0) + 1;
+    return { ...l, nth: l.artist ? seen[l.artist] : 0 };
+  });
 }
 
 /* ===========================
@@ -730,13 +786,13 @@ function fillYearFilter(id, data) {
   const select = $(id);
   const current = select.value;
   select.length = 1;
-  [...new Set(data.map(d => d.year).filter(Boolean))].sort((a, b) => b - a)
+  [...new Set(data.map(d => d.year).filter(Boolean))].sort((a, b) => Number(b) - Number(a))
     .forEach(y => select.add(new Option(`${y}年`, y)));
   select.value = [...select.options].some(o => o.value === current) ? current : "all";
 }
 
 /* ===========================
-   ARTIST RANKING（内訳つき・同点は同順位）
+   ARTIST RANKING（同点は同順位）
 =========================== */
 function calcArtistRanking() {
   const map = {};
@@ -779,19 +835,16 @@ function rankingRowsHtml(list, withBreakdown) {
 }
 
 function renderFullRanking() {
-  const q = $("rankingSearch").value.trim().toLowerCase();
-  const list = q ? rankingAll.filter(r => r.name.toLowerCase().includes(q)) : rankingAll;
-  $("rankingCount").textContent = `${list.length}組`;
+  const list = rankingAll.filter(r => r.rank <= RANK_LIMIT);
   $("artistRankingFull").innerHTML = list.length
     ? rankingRowsHtml(list, true)
-    : `<div class="empty">${q ? "該当するアーティストがいません" : "まだデータがありません"}</div>`;
+    : `<div class="empty">まだデータがありません</div>`;
 }
 
 /* ===========================
    DASHBOARD
 =========================== */
 function updateDashboard() {
-  /* 合計：年間シートに記録がある年は、週次の同じ年を足さない（二重計上防止） */
   const annualYears = new Set(yearlyData.filter(y => y.minutes > 0).map(y => y.year));
   const totalMin =
     yearlyData.reduce((a, b) => a + b.minutes, 0) +
@@ -800,7 +853,6 @@ function updateDashboard() {
   const days = Math.floor(totalMin / 1440), hours = Math.floor((totalMin % 1440) / 60);
   $("totalDays").textContent = `約 ${days} 日 ${hours} 時間`;
 
-  /* 今年 */
   $("thisYearLabel").textContent = `${THIS_YEAR} LISTENING`;
   const yw = weeklyData.filter(w => w.year === THIS_YEAR);
   const minYear = yw.reduce((a, b) => a + b.minutes, 0);
@@ -812,12 +864,10 @@ function updateDashboard() {
     $("thisYearSub").textContent = "まだ記録がありません";
   }
 
-  /* ランキング TOP5 */
   $("artistRankingTop").innerHTML = rankingAll.length
     ? rankingRowsHtml(rankingAll.slice(0, DASH_RANK), false)
     : `<div class="empty">まだデータがありません</div>`;
 
-  /* Latest Week（先週比つき） */
   const latest = weeklyData.at(-1), prev = weeklyData.at(-2);
   if (!latest) { $("latestWeek").innerHTML = `<div class="empty">まだ記録がありません</div>`; return; }
   let deltaHtml = "";
@@ -850,6 +900,17 @@ function trackListHtml(list) {
   return `<div class="artist-list">${list.map((r, i) => `
     <div class="artist-row"><span class="artist-rank">#${i + 1}</span>
       <span>${esc(r.title)}${r.artist ? ` <span class="track-artist">— ${esc(r.artist)}</span>` : ""}</span></div>`).join("")}</div>`;
+}
+
+/* ===========================
+   SPOTIFY
+=========================== */
+function setupSpotify() {
+  const m = SPOTIFY_URL.match(/open\.spotify\.com\/(?:intl-[a-z-]+\/)?(playlist|album|track|artist)\/([A-Za-z0-9]+)/);
+  if (!m) return;
+  $("spotifyFrame").src = `https://open.spotify.com/embed/${m[1]}/${m[2]}?utm_source=generator`;
+  $("spotifyOpen").href = SPOTIFY_URL;
+  $("spotifyCard").classList.remove("hidden");
 }
 
 /* ===========================
@@ -891,16 +952,59 @@ function renderAnnual() {
 /* ===========================
    LIVE
 =========================== */
+const MONTHS = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
+const WDAYS  = ["SUN","MON","TUE","WED","THU","FRI","SAT"];
+
+// 「3/15」「2024/03/15」「3月15日」などから月と日を取り出す
+function parseMD(str) {
+  const nums = String(str || "").match(/\d+/g) || [];
+  if (nums.length < 2) return null;
+  const [m, d] = nums.slice(-2).map(Number);
+  if (m < 1 || m > 12 || d < 1 || d > 31) return null;
+  return { m, d };
+}
+
 function renderLiveStats() {
   const counts = {};
   liveData.forEach(l => { if (l.artist) counts[l.artist] = (counts[l.artist] || 0) + 1; });
   const max = Math.max(0, ...Object.values(counts));
-  const bests = Object.keys(counts).filter(k => counts[k] === max);   // 同数なら全員表示
+  const bests = Object.keys(counts).filter(k => counts[k] === max);
   $("mostSeenArtist").textContent = max ? bests.join(" / ") : "—";
   $("mostSeenCount").textContent  = max ? `${max}回 参戦` : "まだ記録がありません";
   setCount($("liveTotal"), liveData.length, "公演");
+  const artistNum = Object.keys(counts).length;
+  $("liveTotalSub").textContent = artistNum ? `${artistNum}組のアーティスト` : "通算公演数";
   $("liveThisYearLabel").textContent = `${THIS_YEAR} SHOWS`;
   setCount($("liveThisYear"), liveData.filter(l => l.year === THIS_YEAR).length, "公演");
+}
+
+function ticketHtml(l) {
+  const md = parseMD(l.date);
+  let stub;
+  if (md) {
+    const y = Number(l.year);
+    const wd = y ? WDAYS[new Date(y, md.m - 1, md.d).getDay()] : "";
+    stub = `
+      <div class="ticket-month">${MONTHS[md.m - 1]}</div>
+      <div class="ticket-day">${md.d}</div>
+      <div class="ticket-sub">${esc(l.year)}${wd ? " · " + wd : ""}</div>`;
+  } else {
+    stub = `
+      <div class="ticket-sub">${esc(l.year)}</div>
+      <div class="ticket-raw">${esc(l.date) || "—"}</div>`;
+  }
+  const tag = !l.artist ? ""
+    : l.nth > 1 ? `<span class="ticket-tag">${l.nth}回目</span>`
+    : `<span class="ticket-tag first">初参戦</span>`;
+  return `
+    <article class="ticket anim">
+      <div class="ticket-stub">${stub}</div>
+      <div class="ticket-body">
+        <div class="ticket-artist">${esc(l.artist) || "—"}</div>
+        ${l.live ? `<div class="ticket-name">${esc(l.live)}</div>` : ""}
+        ${tag ? `<div class="ticket-meta">${tag}</div>` : ""}
+      </div>
+    </article>`;
 }
 
 function renderLive() {
@@ -909,29 +1013,19 @@ function renderLive() {
   $("liveCount").textContent = `${data.length}公演`;
   if (!data.length) { $("liveList").innerHTML = `<div class="empty">この年のライブ記録はありません</div>`; return; }
 
-  let html = `<div class="live-grid">`, lastYear = null;
+  let html = "", lastYear = null;
   data.forEach(l => {
     if (year === "all" && l.year !== lastYear) {
       html += `<div class="year-divider anim">${esc(l.year)} · ${data.filter(x => x.year === l.year).length}公演</div>`;
       lastYear = l.year;
     }
-    html += `
-      <article class="live-card anim">
-        <div class="live-card-left">
-          <div class="live-card-year">${esc(l.year)}</div>
-          <div class="live-card-date">${esc(l.date)}</div>
-        </div>
-        <div>
-          <div class="live-card-artist">${esc(l.artist)}</div>
-          <div class="live-card-name">${esc(l.live)}</div>
-        </div>
-      </article>`;
+    html += ticketHtml(l);
   });
-  $("liveList").innerHTML = html + `</div>`;
+  $("liveList").innerHTML = `<div class="live-grid">${html}</div>`;
 }
 
 /* ===========================
-   CHART（最新週をハイライト・下から伸びるアニメーション）
+   CHART
 =========================== */
 function renderChart() {
   if (typeof Chart === "undefined") return;
@@ -986,18 +1080,19 @@ function renderChart() {
 =========================== */
 function applyTheme(dark) {
   document.body.classList.toggle("dark", !!dark);
-  $("themeBtn").textContent = dark ? "☀" : "🌙";   // 押したら切り替わる先を表示
+  $("themeBtn").textContent = dark ? "☀" : "🌙";
   $("themeBtn").setAttribute("aria-label", dark ? "ライトモードにする" : "ダークモードにする");
 }
 function toggleTheme() {
-  const btn = $("themeBtn");
-  btn.classList.toggle("spin");
-  applyTheme(!document.body.classList.contains("dark"));
+  $("themeBtn").classList.toggle("spin");
+  const dark = !document.body.classList.contains("dark");
+  applyTheme(dark);
+  try { localStorage.setItem("theme", dark ? "dark" : "light"); } catch (e) {}
   if (weeklyData.length) renderChart();
 }
 
 /* ===========================
-   NAV（URLの#で管理 → リロード・戻るボタン・共有に対応）
+   NAV
 =========================== */
 function showSection() {
   const id = SECTIONS.includes(location.hash.slice(1)) ? location.hash.slice(1) : "dashboard";
@@ -1007,18 +1102,22 @@ function showSection() {
     t.dataset.section === id ? t.setAttribute("aria-current", "page") : t.removeAttribute("aria-current"));
   window.scrollTo({ top: 0 });
   enterSection(id);
-  // ダッシュボードに戻ったらグラフも伸び直す
   if (id === "dashboard" && weeklyData.length) renderChart();
 }
 window.addEventListener("hashchange", showSection);
+
+// ⓘ の吹き出しは外側をタップしたら閉じる
+document.addEventListener("click", e => {
+  document.querySelectorAll("details.info[open]").forEach(d => { if (!d.contains(e.target)) d.open = false; });
+});
 
 /* ===========================
    INIT
 =========================== */
 applyTheme(document.body.classList.contains("dark"));
+setupSpotify();
 showSection();
 loadData();
 </script>
 </body>
-</html>
 </html>
