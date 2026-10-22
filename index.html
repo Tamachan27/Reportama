@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>My Music Archive</title>
+<meta name="description" content="自分の音楽の聴き方・ライブ参戦の記録">
+<meta name="theme-color" content="#e8e4f8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#12101e" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎧</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -25,6 +29,7 @@
   --text-dim:   #8f86ad;
   --accent-a: #7b5ea7;
   --accent-b: #38bdf8;
+  --fire:     #ea580c;
   --grad: linear-gradient(120deg, #a78bfa, #38bdf8);
   --grad-bar: linear-gradient(90deg, #a78bfa, #38bdf8);
   --green: #059669;
@@ -48,6 +53,7 @@ body.dark {
   --text-muted: #9a92bd;
   --text-dim:   #6b6490;
   --accent-a: #a78bfa;
+  --fire:     #fb923c;
   --green: #34d399;
   --red:   #f87171;
   --skel-a: rgba(255,255,255,0.04);
@@ -80,7 +86,7 @@ button, select, input { font-family: inherit; }
 }
 
 /* ===========================
-   EQUALIZER（ロゴ・ローディング共通）
+   EQUALIZER
 =========================== */
 .eq { display: inline-flex; align-items: flex-end; gap: 3px; height: 18px; }
 .eq span {
@@ -202,7 +208,7 @@ button, select, input { font-family: inherit; }
 .info summary::-webkit-details-marker { display: none; }
 .info[open] summary { color: var(--text); }
 .info-body {
-  position: absolute; right: 0; top: 32px; z-index: 10; width: 250px;
+  position: absolute; right: 0; top: 32px; z-index: 10; width: 260px;
   background: var(--surface-solid); border: 1px solid var(--border); border-radius: 12px;
   box-shadow: var(--shadow); padding: 12px 14px; line-height: 1.7; color: var(--text-muted);
   animation: fadeUp .2s both;
@@ -217,25 +223,27 @@ button, select, input { font-family: inherit; }
 .stat-block { padding: 22px 20px 20px; min-width: 0; }
 .stat-block-label { margin-bottom: 12px; }
 .stat-block-num { font-size: clamp(28px, 4vw, 48px); font-weight: 800; letter-spacing: -0.03em; line-height: 1.05; margin-bottom: 8px; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
-.stat-block-num.sm { font-size: clamp(22px, 3vw, 34px); }
+.stat-block-num.sm { font-size: clamp(20px, 2.6vw, 32px); }
 .unit { font-size: 0.45em; font-weight: 700; margin-left: 4px; }
 .stat-block-sub { font-size: 12px; color: var(--text-muted); }
 
 /* ===========================
-   DASHBOARD GRID
+   GRID
 =========================== */
 .mid-row { display: grid; grid-template-columns: 1fr 1.4fr; gap: 14px; margin-bottom: 16px; }
+.mid-row.two { grid-template-columns: 1fr 1fr; }
 .chart-wrap { position: relative; height: 240px; }
+.mb { margin-bottom: 16px; }
 
 /* Spotify */
 .spotify-frame { display: block; width: 100%; height: 352px; border: 0; border-radius: 12px; }
 
 /* ===========================
-   RANKING ROWS
+   LIST ROWS（Records共通）
 =========================== */
 .ranking-row {
   display: grid; grid-template-columns: 30px 1fr auto; align-items: center; gap: 10px;
-  padding: 9px 6px; margin: 0 -6px; border-bottom: 1px solid var(--border); border-radius: 8px;
+  padding: 10px 6px; margin: 0 -6px; border-bottom: 1px solid var(--border); border-radius: 8px;
   transition: background .2s;
 }
 .ranking-row:hover { background: rgba(120,100,200,0.06); }
@@ -244,15 +252,19 @@ button, select, input { font-family: inherit; }
 .rank-num { font-family: var(--mono); font-size: 11px; color: var(--text-dim); }
 .ranking-name-wrap { min-width: 0; }
 .ranking-name { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
-.ranking-bar-wrap { margin-top: 5px; height: 4px; background: rgba(120,100,200,0.12); border-radius: 99px; overflow: hidden; }
+.row-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ranking-bar-wrap { margin-top: 6px; height: 4px; background: rgba(120,100,200,0.12); border-radius: 99px; overflow: hidden; }
 .ranking-bar { height: 100%; background: var(--grad-bar); border-radius: 99px; transform-origin: left; animation: grow .9s cubic-bezier(.2,.7,.3,1) both; }
+.fire .ranking-bar { background: linear-gradient(90deg, #fbbf24, var(--fire)); }
 @keyframes grow { from { transform: scaleX(0); } }
-.ranking-score { font-family: var(--mono); font-size: 11px; color: var(--text-muted); white-space: nowrap; }
-.breakdown { display: flex; flex-wrap: wrap; gap: 4px 10px; margin-top: 6px; font-size: 11px; color: var(--text-muted); }
-.breakdown span b { font-family: var(--mono); font-weight: 700; color: var(--text); margin-left: 2px; }
-.full-ranking .ranking-row { padding: 12px 6px; }
-.full-ranking .ranking-name { font-size: 14px; }
-.full-ranking .ranking-score { font-size: 13px; color: var(--text); font-weight: 700; }
+.ranking-score { font-family: var(--mono); font-size: 12px; font-weight: 700; color: var(--text); white-space: nowrap; }
+.fire .ranking-score { color: var(--fire); }
+.streak-chip {
+  display: inline-block; margin-left: 6px; white-space: nowrap; vertical-align: 1px;
+  font-family: var(--mono); font-size: 10px; font-weight: 700;
+  color: var(--fire); background: color-mix(in srgb, var(--fire) 13%, transparent);
+  padding: 1px 7px; border-radius: 99px;
+}
 
 /* ===========================
    LATEST WEEK
@@ -267,9 +279,6 @@ button, select, input { font-family: inherit; }
 .delta small { font-family: var(--font); font-weight: 500; opacity: .8; }
 .mini-label { font-size: 10px; font-weight: 600; letter-spacing: 0.1em; color: var(--text-dim); margin-bottom: 8px; }
 
-/* ===========================
-   LIST ROWS
-=========================== */
 .artist-list { display: flex; flex-direction: column; gap: 6px; }
 .artist-row { display: flex; align-items: baseline; gap: 8px; font-size: 13px; font-weight: 500; min-width: 0; }
 .artist-row > span:last-child { min-width: 0; overflow-wrap: anywhere; }
@@ -317,7 +326,6 @@ button, select, input { font-family: inherit; }
   padding: 14px 18px; border-left: 2px dashed var(--border);
   display: flex; flex-direction: column; justify-content: center; gap: 4px;
 }
-/* チケットの切り込み */
 .ticket-body::before, .ticket-body::after {
   content: ""; position: absolute; left: -9px; width: 16px; height: 16px; border-radius: 50%;
   background: var(--surface-solid); border: 1px solid var(--border);
@@ -369,7 +377,7 @@ button, select, input { font-family: inherit; }
    RESPONSIVE
 =========================== */
 @media (max-width: 900px) {
-  .mid-row { grid-template-columns: 1fr; }
+  .mid-row, .mid-row.two { grid-template-columns: 1fr; }
   .latest-inner { grid-template-columns: 1fr 1fr; gap: 20px; }
   .latest-inner > :first-child { grid-column: 1 / -1; }
   .stat-row.three { grid-template-columns: 1fr 1fr; }
@@ -378,7 +386,6 @@ button, select, input { font-family: inherit; }
 @media (max-width: 680px) {
   .topnav {
     padding: 0 16px; height: 54px;
-    /* 子のタブバーを画面下に固定するため、スマホではぼかしを外す */
     backdrop-filter: none; -webkit-backdrop-filter: none;
     background: var(--surface-solid);
   }
@@ -404,7 +411,7 @@ button, select, input { font-family: inherit; }
   .ticket { grid-template-columns: 72px 1fr; }
   .ticket-day { font-size: 28px; }
   .ticket-body { padding: 12px 14px; }
-  .info-body { width: 220px; }
+  .info-body { width: 230px; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
@@ -413,7 +420,6 @@ button, select, input { font-family: inherit; }
 </head>
 <body class="is-splash">
 <script>
-  // 保存されたテーマ → なければOSの設定。ローディング画面が一瞬白く光るのを防ぐ
   (function () {
     var saved = null;
     try { saved = localStorage.getItem("theme"); } catch (e) {}
@@ -437,7 +443,7 @@ button, select, input { font-family: inherit; }
   <div class="topnav-right">
     <nav class="tabs" aria-label="セクション">
       <a class="tab" href="#dashboard" data-section="dashboard"><span class="tab-icon" aria-hidden="true">🏠</span>Home</a>
-      <a class="tab" href="#ranking"   data-section="ranking"><span class="tab-icon" aria-hidden="true">👑</span>Ranking</a>
+      <a class="tab" href="#records"   data-section="records"><span class="tab-icon" aria-hidden="true">🔥</span>Records</a>
       <a class="tab" href="#weekly"    data-section="weekly"><span class="tab-icon" aria-hidden="true">📅</span>Weekly</a>
       <a class="tab" href="#annual"    data-section="annual"><span class="tab-icon" aria-hidden="true">🏆</span>Annual</a>
       <a class="tab" href="#live"      data-section="live"><span class="tab-icon" aria-hidden="true">🎫</span>Live</a>
@@ -469,7 +475,7 @@ button, select, input { font-family: inherit; }
       </div>
     </div>
 
-    <div class="card anim" style="margin-bottom:16px">
+    <div class="card anim mb">
       <div class="card-head">
         <div class="card-label">
           <span class="eq xs" aria-hidden="true"><span></span><span></span><span></span></span>
@@ -487,13 +493,11 @@ button, select, input { font-family: inherit; }
     <div class="mid-row">
       <div class="card anim">
         <div class="card-head">
-          <div class="card-label">ARTIST RANKING<span class="label-sub">TOP 5</span></div>
-          <a class="more-link" href="#ranking">TOP10を見る <span class="arrow">→</span></a>
+          <div class="card-label">🔥 ON FIRE<span class="label-sub" id="streakDashSub">連続ランクイン中</span></div>
+          <a class="more-link" href="#records">記録を見る <span class="arrow">→</span></a>
         </div>
-        <div id="artistRankingTop">
-          <span class="skel skel-line"></span><span class="skel skel-line"></span>
-          <span class="skel skel-line"></span><span class="skel skel-line"></span>
-          <span class="skel skel-line"></span>
+        <div id="streakDash">
+          <span class="skel skel-line"></span><span class="skel skel-line"></span><span class="skel skel-line"></span>
         </div>
       </div>
       <div class="card anim">
@@ -502,7 +506,6 @@ button, select, input { font-family: inherit; }
       </div>
     </div>
 
-    <!-- Spotify（CONFIG の SPOTIFY_URL を入れると表示） -->
     <div id="spotifyCard" class="card anim hidden">
       <div class="card-head">
         <div class="card-label">🎧 MY PLAYLIST</div>
@@ -513,29 +516,69 @@ button, select, input { font-family: inherit; }
     </div>
   </section>
 
-  <!-- ===== RANKING ===== -->
-  <section id="ranking" class="hidden">
+  <!-- ===== RECORDS ===== -->
+  <section id="records" class="hidden">
     <div class="section-header anim">
       <div>
-        <h2>Artist Ranking</h2>
-        <p class="section-sub">全期間のアーティストランキング TOP10</p>
+        <h2>Records</h2>
+        <p class="section-sub">週間TOP3から見るアーティストの記録</p>
       </div>
       <div class="filter-bar">
         <details class="info">
           <summary>ⓘ 集計方法</summary>
           <div class="info-body">
-            <b>週間TOP</b> 1位3pt・2位2pt・3位1pt<br>
-            <b>年間TOP</b> 1位5pt〜5位1pt<br>
-            <b>リピート曲</b> 1曲につき+1pt<br>
-            <b>ライブ参戦</b> 1回につき+1pt<br>
-            同点は同じ順位として表示します
+            <b>連続ランクイン</b> 週間TOP3に続けて入った週数<br>
+            <b>1位獲得</b> 週間TOPで1位になった回数<br>
+            <b>TOP3入り</b> 週間TOP3に入った回数<br>
+            <b>リピート曲</b> REPEAT TRACKSに入った週数<br>
+            ※シートの1行＝1週として、上から順に数えています
           </div>
         </details>
       </div>
     </div>
-    <div class="card full-ranking anim">
-      <div id="artistRankingFull">
-        <span class="skel skel-line"></span><span class="skel skel-line"></span><span class="skel skel-line"></span>
+
+    <div class="stat-row three">
+      <div class="stat-block anim">
+        <div class="stat-block-label">BEST WEEK</div>
+        <div id="bestWeekNum" class="stat-block-num sm grad-text">—</div>
+        <div id="bestWeekSub" class="stat-block-sub"></div>
+      </div>
+      <div class="stat-block anim">
+        <div class="stat-block-label">LONGEST STREAK</div>
+        <div id="longestName" class="stat-block-num sm grad-text">—</div>
+        <div id="longestSub" class="stat-block-sub"></div>
+      </div>
+      <div class="stat-block anim">
+        <div class="stat-block-label">MOST #1</div>
+        <div id="mostNo1Name" class="stat-block-num sm grad-text">—</div>
+        <div id="mostNo1Sub" class="stat-block-sub"></div>
+      </div>
+    </div>
+
+    <div class="card anim mb">
+      <div class="card-head"><div class="card-label">🔥 ON FIRE<span class="label-sub">いま連続ランクイン中</span></div></div>
+      <div id="streakNow" class="fire"></div>
+    </div>
+
+    <div class="mid-row two">
+      <div class="card anim">
+        <div class="card-head"><div class="card-label">LONGEST STREAK<span class="label-sub">最長連続ランクイン</span></div></div>
+        <div id="streakBest" class="fire"></div>
+      </div>
+      <div class="card anim">
+        <div class="card-head"><div class="card-label">WEEKLY #1<span class="label-sub">1位獲得回数</span></div></div>
+        <div id="no1List"></div>
+      </div>
+    </div>
+
+    <div class="mid-row two">
+      <div class="card anim">
+        <div class="card-head"><div class="card-label">TOP 3 ENTRIES<span class="label-sub">TOP3入り回数</span></div></div>
+        <div id="top3List"></div>
+      </div>
+      <div class="card anim">
+        <div class="card-head"><div class="card-label">MOST REPEATED 🔁<span class="label-sub">リピートした週数</span></div></div>
+        <div id="repeatList"></div>
       </div>
     </div>
   </section>
@@ -623,20 +666,19 @@ const weeklyUrl = `${BASE}?gid=0&single=true&output=csv`;
 const yearUrl   = `${BASE}?gid=575136021&single=true&output=csv`;
 const liveUrl   = `${BASE}?gid=1117584699&single=true&output=csv`;
 
-// ↓ 自分のSpotifyプレイリストのURLを "" の中に貼る（空のままならカードは非表示）
-//   例: "https://open.spotify.com/playlist/xxxxxxxxxxxxxxxxxxxxxx?si=..."
-const SPOTIFY_URL = "";
+// Spotify（空にするとカードは非表示）
+const SPOTIFY_URL = "https://open.spotify.com/playlist/1snbdIdAHzGesplNtkzMPC?si=6e935d5372ac4b47";
 
-const CHART_WEEKS  = 5;      // グラフの週数
-const DASH_RANK    = 5;      // ダッシュボードのランキング件数
-const RANK_LIMIT   = 10;     // Rankingページの表示順位（TOP10）
-const SPLASH_MIN   = 1200;   // ローディング画面を最低何ミリ秒見せるか
-const THIS_YEAR    = String(new Date().getFullYear());
-const SECTIONS     = ["dashboard", "ranking", "weekly", "annual", "live"];
-const REDUCED      = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+const CHART_WEEKS   = 5;      // グラフの週数
+const LIST_LIMIT    = 5;      // Recordsの各リストの件数
+const FETCH_TIMEOUT = 15000;  // 通信を諦めるまでのミリ秒
+const SPLASH_MIN    = 1200;   // ローディング画面を最低何ミリ秒見せるか
+const THIS_YEAR     = String(new Date().getFullYear());
+const SECTIONS      = ["dashboard", "records", "weekly", "annual", "live"];
+const REDUCED       = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 
 let weeklyData = [], yearlyData = [], liveData = [];
-let rankingAll = [];
+let streaks = { current: [], longest: [] };
 let chartInst = null;
 let currentSection = "dashboard";
 const startedAt = performance.now();
@@ -649,6 +691,7 @@ const esc = s => String(s ?? "").replace(/[&<>"']/g, c =>
 const fmt = n => Number(n).toLocaleString("ja-JP");
 const $ = id => document.getElementById(id);
 const sleep = ms => new Promise(r => setTimeout(r, ms));
+const weekLabel = w => w ? `${w.year} ${w.week}` : "";
 
 /* ===========================
    SPLASH
@@ -698,14 +741,17 @@ function enterSection(id) {
 }
 
 /* ===========================
-   FETCH
+   FETCH（タイムアウト付き・常に最新を取得）
 =========================== */
+function getText(url) {
+  const signal = typeof AbortSignal !== "undefined" && AbortSignal.timeout ? AbortSignal.timeout(FETCH_TIMEOUT) : undefined;
+  return fetch(url, { cache: "no-store", signal })
+    .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.text(); });
+}
 async function loadData() {
   $("errorBanner").classList.add("hidden");
   try {
-    const [w, y, l] = await Promise.all([weeklyUrl, yearUrl, liveUrl].map(u =>
-      fetch(u).then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.text(); })
-    ));
+    const [w, y, l] = await Promise.all([weeklyUrl, yearUrl, liveUrl].map(getText));
     weeklyData = parseWeekly(w);
     yearlyData = parseYear(y);
     liveData   = parseLive(l);
@@ -722,7 +768,7 @@ async function loadData() {
    PARSE
 =========================== */
 function parseCSV(text) {
-  text = text.replace(/^\uFEFF/, "");   // 先頭のBOMを除去
+  text = text.replace(/^\uFEFF/, "");
   const rows = [];
   let row = [], field = "", inQuotes = false;
   for (let i = 0; i < text.length; i++) {
@@ -756,7 +802,7 @@ function parseYear(csv) {
   })).filter(y => y.year);
 }
 function parseLive(csv) {
-  const seen = {};   // アーティストごとの参戦回数（シートが古い順に並んでいる前提）
+  const seen = {};
   return parseCSV(csv).map(c => ({
     year: c[0] || "", date: c[1] || "", artist: c[2] || "", live: c[3] || ""
   })).filter(l => l.year || l.artist).map(l => {
@@ -771,9 +817,9 @@ function parseLive(csv) {
 function renderAll() {
   fillYearFilter("weeklyYearFilter", weeklyData);
   fillYearFilter("liveYearFilter", liveData);
-  rankingAll = calcArtistRanking();
+  streaks = calcStreaks();
   updateDashboard();
-  renderFullRanking();
+  renderRecords();
   renderWeekly();
   renderAnnual();
   renderLiveStats();
@@ -792,53 +838,100 @@ function fillYearFilter(id, data) {
 }
 
 /* ===========================
-   ARTIST RANKING（同点は同順位）
+   RECORDS の計算
 =========================== */
-function calcArtistRanking() {
-  const map = {};
-  const add = (name, key, pt) => {
-    const n = (name || "").trim();
-    if (!n) return;
-    map[n] ??= { name: n, weekly: 0, annual: 0, repeat: 0, live: 0, total: 0 };
-    map[n][key] += pt; map[n].total += pt;
-  };
-  weeklyData.forEach(w => {
-    w.tops.forEach((a, i) => add(a, "weekly", 3 - i));
-    w.repeats.forEach(r => add(r.artist, "repeat", 1));
+// 連続ランクイン（週間TOP3に何週続けて入ったか）
+function calcStreaks() {
+  const cur = {}, best = {};
+  weeklyData.forEach((w, i) => {
+    const set = new Set(w.tops);
+    Object.keys(cur).forEach(a => { if (!set.has(a)) delete cur[a]; });
+    set.forEach(a => {
+      cur[a] ??= { len: 0, from: i };
+      cur[a].len++;
+      if (!best[a] || cur[a].len > best[a].len) best[a] = { len: cur[a].len, from: cur[a].from, to: i };
+    });
   });
-  yearlyData.forEach(y => y.artists.forEach((a, i) => add(a, "annual", 5 - i)));
-  liveData.forEach(l => add(l.artist, "live", 1));
-
-  const list = Object.values(map).sort((a, b) => b.total - a.total || a.name.localeCompare(b.name, "ja"));
-  list.forEach((r, i) => { r.rank = i > 0 && r.total === list[i - 1].total ? list[i - 1].rank : i + 1; });
-  return list;
+  const byValue = (a, b) => b.value - a.value || a.name.localeCompare(b.name, "ja");
+  const current = Object.entries(cur).filter(([, v]) => v.len >= 2)
+    .map(([name, v]) => ({ name, value: v.len, sub: `${weekLabel(weeklyData[v.from])} から` }))
+    .sort(byValue);
+  const longest = Object.entries(best).filter(([, v]) => v.len >= 2)
+    .map(([name, v]) => ({ name, value: v.len, sub: `${weekLabel(weeklyData[v.from])} 〜 ${weekLabel(weeklyData[v.to])}` }))
+    .sort(byValue);
+  return { current, longest };
 }
 
-function rankingRowsHtml(list, withBreakdown) {
-  const topScore = rankingAll[0]?.total || 1;
+// 名前の出現回数を数えて多い順に
+function countBy(names) {
+  const m = {};
+  names.forEach(n => { n = (n || "").trim(); if (n) m[n] = (m[n] || 0) + 1; });
+  return Object.entries(m).map(([name, value]) => ({ name, value }))
+    .sort((a, b) => b.value - a.value || a.name.localeCompare(b.name, "ja"));
+}
+
+// 共通のリスト表示（同じ値は同じ順位）
+function rowsHtml(items, unit, emptyMsg) {
+  if (!items.length) return `<div class="empty">${emptyMsg}</div>`;
+  const max = items[0].value || 1;
   const medals = { 1: "🥇", 2: "🥈", 3: "🥉" };
-  return list.map((r, i) => `
+  let rank = 0;
+  return items.map((it, i) => {
+    if (i === 0 || it.value !== items[i - 1].value) rank = i + 1;
+    return `
     <div class="ranking-row">
-      <span class="ranking-medal">${medals[r.rank] ?? `<span class="rank-num">${r.rank}</span>`}</span>
+      <span class="ranking-medal">${medals[rank] ?? `<span class="rank-num">${rank}</span>`}</span>
       <div class="ranking-name-wrap">
-        <span class="ranking-name" title="${esc(r.name)}">${esc(r.name)}</span>
-        <div class="ranking-bar-wrap"><div class="ranking-bar" style="width:${Math.round(r.total / topScore * 100)}%;animation-delay:${200 + Math.min(i, 15) * 50}ms"></div></div>
-        ${withBreakdown ? `<div class="breakdown">
-          ${r.weekly ? `<span>週間<b>${r.weekly}</b></span>` : ""}
-          ${r.annual ? `<span>年間<b>${r.annual}</b></span>` : ""}
-          ${r.repeat ? `<span>リピート<b>${r.repeat}</b></span>` : ""}
-          ${r.live   ? `<span>ライブ<b>${r.live}</b></span>` : ""}
-        </div>` : ""}
+        <span class="ranking-name" title="${esc(it.name)}">${esc(it.name)}</span>
+        ${it.sub ? `<div class="row-sub" title="${esc(it.sub)}">${esc(it.sub)}</div>` : ""}
+        <div class="ranking-bar-wrap"><div class="ranking-bar" style="width:${Math.round(it.value / max * 100)}%;animation-delay:${200 + i * 50}ms"></div></div>
       </div>
-      <span class="ranking-score">${r.total}pt</span>
-    </div>`).join("");
+      <span class="ranking-score">${it.value}${unit}</span>
+    </div>`;
+  }).join("");
 }
 
-function renderFullRanking() {
-  const list = rankingAll.filter(r => r.rank <= RANK_LIMIT);
-  $("artistRankingFull").innerHTML = list.length
-    ? rankingRowsHtml(list, true)
-    : `<div class="empty">まだデータがありません</div>`;
+// 1位タイを「A / B」でまとめる
+const topNames = list => list.filter(x => x.value === list[0].value).map(x => x.name).join(" / ");
+
+function renderRecords() {
+  // ベストウィーク
+  const best = weeklyData.reduce((a, b) => (!a || b.minutes > a.minutes ? b : a), null);
+  if (best && best.minutes > 0) {
+    setCount($("bestWeekNum"), best.minutes, "分");
+    $("bestWeekSub").textContent = weekLabel(best);
+  } else {
+    $("bestWeekNum").textContent = "—";
+    $("bestWeekSub").textContent = "まだ記録がありません";
+  }
+
+  // 最長連続
+  const L = streaks.longest;
+  $("longestName").textContent = L.length ? topNames(L) : "—";
+  $("longestSub").textContent  = L.length ? `${L[0].value}週連続ランクイン` : "まだ記録がありません";
+
+  // 1位最多
+  const no1 = countBy(weeklyData.map(w => w.tops[0]));
+  $("mostNo1Name").textContent = no1.length ? topNames(no1) : "—";
+  $("mostNo1Sub").textContent  = no1.length ? `週間1位 ${no1[0].value}回` : "まだ記録がありません";
+
+  // リスト
+  $("streakNow").innerHTML  = rowsHtml(streaks.current, "週", "いま連続ランクイン中のアーティストはいません");
+  $("streakBest").innerHTML = rowsHtml(L.slice(0, LIST_LIMIT), "週", "まだ連続ランクインの記録はありません");
+  $("no1List").innerHTML    = rowsHtml(no1.slice(0, LIST_LIMIT), "回", "まだ記録がありません");
+  $("top3List").innerHTML   = rowsHtml(countBy(weeklyData.flatMap(w => w.tops)).slice(0, LIST_LIMIT), "回", "まだ記録がありません");
+
+  // リピート曲（2週以上）
+  const rep = {};
+  weeklyData.forEach(w => w.repeats.forEach(r => {
+    if (!r.title) return;
+    const key = r.title + "\u0000" + r.artist;
+    rep[key] ??= { name: r.title, sub: r.artist, value: 0 };
+    rep[key].value++;
+  }));
+  const repList = Object.values(rep).filter(r => r.value >= 2)
+    .sort((a, b) => b.value - a.value || a.name.localeCompare(b.name, "ja"));
+  $("repeatList").innerHTML = rowsHtml(repList.slice(0, LIST_LIMIT), "週", "2週以上リピートした曲はまだありません");
 }
 
 /* ===========================
@@ -864,10 +957,18 @@ function updateDashboard() {
     $("thisYearSub").textContent = "まだ記録がありません";
   }
 
-  $("artistRankingTop").innerHTML = rankingAll.length
-    ? rankingRowsHtml(rankingAll.slice(0, DASH_RANK), false)
-    : `<div class="empty">まだデータがありません</div>`;
+  // ON FIRE（連続中がいなければ最長記録を表示）
+  const dash = $("streakDash");
+  dash.classList.add("fire");
+  if (streaks.current.length) {
+    $("streakDashSub").textContent = "連続ランクイン中";
+    dash.innerHTML = rowsHtml(streaks.current.slice(0, LIST_LIMIT), "週", "");
+  } else {
+    $("streakDashSub").textContent = "これまでの最長記録";
+    dash.innerHTML = rowsHtml(streaks.longest.slice(0, 3), "週", "まだ連続ランクインの記録はありません");
+  }
 
+  // Latest Week
   const latest = weeklyData.at(-1), prev = weeklyData.at(-2);
   if (!latest) { $("latestWeek").innerHTML = `<div class="empty">まだ記録がありません</div>`; return; }
   let deltaHtml = "";
@@ -877,6 +978,7 @@ function updateDashboard() {
     const sign = d > 0 ? "▲" : d < 0 ? "▼" : "±";
     deltaHtml = `<div class="delta ${cls}">${sign} ${fmt(Math.abs(d))}分 <small>先週比</small></div>`;
   }
+  const streakMap = Object.fromEntries(streaks.current.map(s => [s.name, s.value]));
   $("latestWeek").innerHTML = `
     <div class="latest-inner">
       <div>
@@ -884,16 +986,18 @@ function updateDashboard() {
         <div class="latest-meta">${esc(latest.year)} / ${esc(latest.week)}</div>
         ${deltaHtml}
       </div>
-      <div><div class="mini-label">TOP ARTISTS</div>${artistListHtml(latest.tops)}</div>
+      <div><div class="mini-label">TOP ARTISTS</div>${artistListHtml(latest.tops, null, streakMap)}</div>
       <div><div class="mini-label">REPEAT TRACKS 🔁</div>${trackListHtml(latest.repeats)}</div>
     </div>`;
   setCount($("latestMinutes"), latest.minutes, "分");
 }
 
-function artistListHtml(list, marks) {
+function artistListHtml(list, marks, streakMap) {
   if (!list.length) return `<div class="track-artist" style="font-size:13px">—</div>`;
-  return `<div class="artist-list">${list.map((a, i) => `
-    <div class="artist-row"><span class="artist-rank">${marks ? marks[i] : "#" + (i + 1)}</span><span>${esc(a)}</span></div>`).join("")}</div>`;
+  return `<div class="artist-list">${list.map((a, i) => {
+    const s = streakMap?.[a];
+    return `<div class="artist-row"><span class="artist-rank">${marks ? marks[i] : "#" + (i + 1)}</span><span>${esc(a)}${s ? `<span class="streak-chip">🔥${s}週</span>` : ""}</span></div>`;
+  }).join("")}</div>`;
 }
 function trackListHtml(list) {
   if (!list.length) return `<div class="track-artist" style="font-size:13px">—</div>`;
@@ -955,7 +1059,6 @@ function renderAnnual() {
 const MONTHS = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
 const WDAYS  = ["SUN","MON","TUE","WED","THU","FRI","SAT"];
 
-// 「3/15」「2024/03/15」「3月15日」などから月と日を取り出す
 function parseMD(str) {
   const nums = String(str || "").match(/\d+/g) || [];
   if (nums.length < 2) return null;
@@ -1095,7 +1198,9 @@ function toggleTheme() {
    NAV
 =========================== */
 function showSection() {
-  const id = SECTIONS.includes(location.hash.slice(1)) ? location.hash.slice(1) : "dashboard";
+  let id = location.hash.slice(1);
+  if (id === "ranking") id = "records";   // 古いリンク（#ranking）からも開けるように
+  if (!SECTIONS.includes(id)) id = "dashboard";
   currentSection = id;
   SECTIONS.forEach(s => $(s).classList.toggle("hidden", s !== id));
   document.querySelectorAll(".tab").forEach(t =>
@@ -1106,7 +1211,6 @@ function showSection() {
 }
 window.addEventListener("hashchange", showSection);
 
-// ⓘ の吹き出しは外側をタップしたら閉じる
 document.addEventListener("click", e => {
   document.querySelectorAll("details.info[open]").forEach(d => { if (!d.contains(e.target)) d.open = false; });
 });
