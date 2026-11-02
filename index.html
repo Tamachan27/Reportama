@@ -211,24 +211,11 @@ button, select, input { font-family: inherit; }
 .stat-block-sub { font-size: 12px; color: var(--text-muted); }
 
 /* ===========================
-   CHART
+   CHART / SPOTIFY
 =========================== */
 .chart-wrap { position: relative; height: 260px; }
-
-/* ===========================
-   MY MUSIC（Spotify / SoundCloud）
-=========================== */
-.music-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; align-items: start; }
-.music-grid.single { grid-template-columns: 1fr; }
-.music-item { min-width: 0; }
-.music-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
-.music-name { display: flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 600; color: var(--text-muted); }
-.music-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-.music-dot.sp { background: #1db954; }
-.music-dot.sc { background: #ff5500; }
-.music-frame { display: block; width: 100%; border: 0; border-radius: 12px; }
-.spotify-frame    { height: 152px; }
-.soundcloud-frame { height: 166px; }
+.spotify-card { padding-bottom: 20px; }
+.spotify-frame { display: block; width: 100%; height: 152px; border: 0; border-radius: 12px; }
 
 /* ===========================
    LATEST WEEK
@@ -250,21 +237,34 @@ button, select, input { font-family: inherit; }
 .track-artist { color: var(--text-muted); font-weight: 400; }
 
 /* ===========================
-   WEEKLY / ANNUAL
+   WEEKLY / MONTHLY / ANNUAL
 =========================== */
 .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
 .data-card { padding: 20px; }
 .data-card-title { font-size: 20px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 4px; display: flex; align-items: center; flex-wrap: wrap; gap: 6px 0; }
 .data-card-title .yr { font-size: 13px; color: var(--text-muted); font-weight: 500; margin-right: 6px; }
 .data-card-time { font-family: var(--mono); font-size: 12px; color: var(--green); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.data-card-note { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
 .data-card-divider { border: none; border-top: 1px solid var(--border); margin: 14px 0 12px; }
 .data-card.is-latest { border-color: var(--accent-a); }
 .badge { display: inline-flex; align-items: center; gap: 5px; font-size: 10px; font-weight: 700; letter-spacing: .08em; color: #fff; background: var(--grad); padding: 3px 8px; border-radius: 99px; margin-left: 8px; }
 .badge .eq span { background: #fff; }
 .badge.best { background: linear-gradient(120deg, #fb923c, #f43f5e); }
+.badge.wip  { background: none; color: var(--text-muted); border: 1px dashed var(--border); }
 .yoy { font-size: 11px; font-weight: 700; padding: 1px 8px; border-radius: 99px; }
 
+/* 週 / 月 切り替え */
+.seg { display: inline-flex; background: var(--surface); border: 1px solid var(--border); border-radius: 99px; padding: 3px; }
+.seg-btn {
+  border: none; background: none; color: var(--text-muted); cursor: pointer;
+  font-size: 12px; font-weight: 600; padding: 5px 16px; border-radius: 99px;
+  transition: background .2s, color .2s;
+}
+.seg-btn:hover { color: var(--text); }
+.seg-btn.active { background: var(--grad); color: #fff; }
+
 .more-wrap { display: flex; justify-content: center; margin-top: 18px; }
+.more-wrap:empty { display: none; }
 .more-btn {
   background: var(--surface); border: 1px solid var(--border); color: var(--accent-a);
   font-size: 13px; font-weight: 600; padding: 9px 22px; border-radius: 99px; cursor: pointer;
@@ -363,7 +363,7 @@ body.dark .ticket-tag.soon { color: var(--accent-b); }
 .skel-num  { height: 44px; width: 70%; margin-bottom: 10px; }
 .skel-line { height: 14px; margin: 10px 0; }
 .skel-card { height: 180px; border-radius: var(--radius); }
-.empty { text-align: center; color: var(--text-muted); font-size: 13px; padding: 28px 12px; }
+.empty { text-align: center; color: var(--text-muted); font-size: 13px; padding: 28px 12px; grid-column: 1 / -1; }
 .error-banner {
   display: flex; align-items: center; justify-content: space-between; gap: 12px;
   background: color-mix(in srgb, var(--red) 10%, var(--surface-solid));
@@ -406,7 +406,6 @@ body.dark .ticket-tag.soon { color: var(--accent-b); }
   .latest-inner { grid-template-columns: 1fr; }
   .latest-time { font-size: 38px; }
   .chart-wrap { height: 210px; }
-  .music-grid { grid-template-columns: 1fr; gap: 16px; }
   .ticket { grid-template-columns: 72px 1fr; }
   .ticket-day { font-size: 28px; }
   .ticket-body { padding: 12px 14px; }
@@ -494,44 +493,40 @@ body.dark .ticket-tag.soon { color: var(--accent-b); }
       <div class="chart-wrap"><canvas id="weeklyChart" aria-label="週ごとの再生時間グラフ" role="img"></canvas></div>
     </div>
 
-    <!-- Spotify / SoundCloud -->
-    <div id="musicCard" class="card anim hidden">
-      <div class="card-head"><div class="card-label">🎧 MY MUSIC</div></div>
-      <div id="musicGrid" class="music-grid">
-        <div id="spotifyBox" class="music-item hidden">
-          <div class="music-head">
-            <span class="music-name"><span class="music-dot sp"></span>Spotify · Playlist</span>
-            <a id="spotifyOpen" class="more-link" target="_blank" rel="noopener">開く <span class="arrow">↗</span></a>
-          </div>
-          <iframe id="spotifyFrame" class="music-frame spotify-frame" title="Spotifyプレイリスト" loading="lazy"
-            allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe>
-        </div>
-        <div id="soundcloudBox" class="music-item hidden">
-          <div class="music-head">
-            <span class="music-name"><span class="music-dot sc"></span>SoundCloud · Profile</span>
-            <a id="soundcloudOpen" class="more-link" target="_blank" rel="noopener">開く <span class="arrow">↗</span></a>
-          </div>
-          <iframe id="soundcloudFrame" class="music-frame soundcloud-frame" title="SoundCloudプロフィール" loading="lazy"
-            scrolling="no" allow="autoplay"></iframe>
-        </div>
+    <div id="spotifyCard" class="card spotify-card anim hidden">
+      <div class="card-head">
+        <div class="card-label">🎧 MY PLAYLIST</div>
+        <a id="spotifyOpen" class="more-link" target="_blank" rel="noopener">Spotifyで開く <span class="arrow">↗</span></a>
       </div>
+      <iframe id="spotifyFrame" class="spotify-frame" title="Spotifyプレイリスト" loading="lazy"
+        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe>
     </div>
   </section>
 
-  <!-- ===== WEEKLY ===== -->
+  <!-- ===== WEEKLY / MONTHLY ===== -->
   <section id="weekly" class="hidden">
     <div class="section-header anim">
       <div>
-        <h2>Weekly History</h2>
-        <p class="section-sub">週ごとの記録</p>
+        <h2 id="weeklyTitle">Weekly History</h2>
+        <p id="weeklySub" class="section-sub">週ごとの記録</p>
       </div>
       <div class="filter-bar">
         <span id="weeklyCount" class="count-chip"></span>
+        <div class="seg" role="group" aria-label="表示単位">
+          <button id="modeWeek"  class="seg-btn" onclick="setWeeklyMode('week')">週</button>
+          <button id="modeMonth" class="seg-btn" onclick="setWeeklyMode('month')">月</button>
+        </div>
         <select id="weeklyYearFilter" aria-label="年で絞り込み" onchange="weeklyExpanded = false; renderWeekly(); enterSection('weekly')">
           <option value="all">すべての年</option>
         </select>
       </div>
     </div>
+
+    <div id="monthChartCard" class="card anim mb hidden">
+      <div class="card-head"><div class="card-label" id="monthChartLabel">MONTHLY TREND</div></div>
+      <div class="chart-wrap"><canvas id="monthlyChart" aria-label="月ごとの再生時間グラフ" role="img"></canvas></div>
+    </div>
+
     <div id="weeklyList" class="card-grid">
       <span class="skel skel-card"></span><span class="skel skel-card"></span><span class="skel skel-card"></span>
     </div>
@@ -608,24 +603,28 @@ const weeklyUrl = `${BASE}?gid=0&single=true&output=csv`;
 const yearUrl   = `${BASE}?gid=575136021&single=true&output=csv`;
 const liveUrl   = `${BASE}?gid=1117584699&single=true&output=csv`;
 
-// 空にするとその枠は非表示（両方空ならカードごと非表示）
-const SPOTIFY_URL    = "https://open.spotify.com/playlist/1snbdIdAHzGesplNtkzMPC?si=6e935d5372ac4b47";
-const SOUNDCLOUD_URL = "https://soundcloud.com/zivm2suh4hov";   // 埋め込みには短縮リンクではなくこの形式が必要
+// Spotify（空にするとカードは非表示）
+const SPOTIFY_URL = "https://open.spotify.com/playlist/1snbdIdAHzGesplNtkzMPC?si=6e935d5372ac4b47";
 
 const CHART_WEEKS   = 5;      // ホームのグラフに出す週数
-const WEEKLY_SHOW   = 5;      // Weeklyページで最初に出す週数（「すべての年」のとき）
+const WEEKLY_SHOW   = 5;      // Weeklyページ（週表示）で最初に出す週数
+const CHART_MONTHS  = 12;     // 月表示のグラフに出す月数（「すべての年」のとき）
 const FETCH_TIMEOUT = 15000;  // 通信を諦めるまでのミリ秒
 const SPLASH_MIN    = 1200;   // ローディング画面を最低何ミリ秒見せるか
 const CACHE_KEY     = "mma-cache-v1";
-const THIS_YEAR     = String(new Date().getFullYear());
+const NOW           = new Date();
+const THIS_YEAR     = String(NOW.getFullYear());
+const THIS_MONTH    = NOW.getMonth() + 1;
 const TODAY         = (() => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; })();
 const SECTIONS      = ["dashboard", "weekly", "annual", "live"];
 const REDUCED       = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 
 let weeklyData = [], yearlyData = [], liveData = [];
-let chartInst = null;
+let chartInst = null, monthChartInst = null;
 let currentSection = "dashboard";
 let weeklyExpanded = false;
+let weeklyMode = "week";
+try { if (localStorage.getItem("weeklyMode") === "month") weeklyMode = "month"; } catch (e) {}
 let hasRendered = false;
 let loading = false;
 const startedAt = performance.now();
@@ -825,13 +824,59 @@ function parseLive(csv) {
 }
 
 /* ===========================
+   週 → 月の判定
+   「10/27〜11/2」「10月第4週」→ 最初の月
+   「44」「W44」「第44週」      → ISO週番号として計算
+=========================== */
+function weekToMonth(w) {
+  const y = Number(w.year);
+  const s = String(w.week);
+  let m = s.match(/(?<!\d)(\d{1,2})\s*[\/.]\s*(\d{1,2})(?!\d)/);
+  if (m && +m[1] >= 1 && +m[1] <= 12) return { year: y, month: +m[1] };
+  m = s.match(/(?<!\d)(\d{1,2})\s*月/);
+  if (m && +m[1] >= 1 && +m[1] <= 12) return { year: y, month: +m[1] };
+  m = s.match(/\d+/);
+  if (m && y) {
+    const n = +m[0];
+    if (n >= 1 && n <= 53) {
+      const jan4 = new Date(y, 0, 4);
+      const offset = (jan4.getDay() + 6) % 7;            // 月曜始まり
+      const thu = new Date(y, 0, 4 - offset + (n - 1) * 7 + 3);
+      return { year: thu.getFullYear(), month: thu.getMonth() + 1 };
+    }
+  }
+  return null;
+}
+
+function buildMonthly() {
+  const map = new Map();
+  let unknown = 0;
+  weeklyData.forEach(w => {
+    const ym = weekToMonth(w);
+    if (!ym) { unknown++; return; }
+    const key = `${ym.year}-${String(ym.month).padStart(2, "0")}`;
+    if (!map.has(key)) map.set(key, { key, year: String(ym.year), month: ym.month, minutes: 0, weeks: 0, points: {} });
+    const mo = map.get(key);
+    mo.minutes += w.minutes;
+    mo.weeks++;
+    w.tops.forEach((a, i) => { mo.points[a] = (mo.points[a] || 0) + (3 - i); });
+  });
+  const list = [...map.values()].sort((a, b) => a.key.localeCompare(b.key));
+  list.forEach((mo, i) => {
+    mo.tops = Object.entries(mo.points).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([a]) => a);
+    mo.prev = list[i - 1] || null;
+  });
+  return { list, unknown };
+}
+
+/* ===========================
    RENDER ALL
 =========================== */
 function renderAll(animate = true) {
   fillYearFilter("weeklyYearFilter", weeklyData);
   fillYearFilter("liveYearFilter", liveData);
   updateDashboard();
-  renderWeekly();
+  renderWeekly(animate);
   renderAnnual();
   renderLiveStats();
   renderLive();
@@ -905,40 +950,48 @@ function trackListHtml(list) {
     <div class="artist-row"><span class="artist-rank">#${i + 1}</span>
       <span>${esc(r.title)}${r.artist ? ` <span class="track-artist">— ${esc(r.artist)}</span>` : ""}</span></div>`).join("")}</div>`;
 }
-
-/* ===========================
-   MY MUSIC（Spotify / SoundCloud）
-=========================== */
-function setupMusic() {
-  let shown = 0;
-
-  const m = SPOTIFY_URL.match(/open\.spotify\.com\/(?:intl-[a-z-]+\/)?(playlist|album|track|artist)\/([A-Za-z0-9]+)/);
-  if (m) {
-    $("spotifyFrame").src = `https://open.spotify.com/embed/${m[1]}/${m[2]}?utm_source=generator`;
-    $("spotifyOpen").href = SPOTIFY_URL;
-    $("spotifyBox").classList.remove("hidden");
-    shown++;
-  }
-
-  if (/soundcloud\.com\//.test(SOUNDCLOUD_URL)) {
-    const params = new URLSearchParams({
-      url: SOUNDCLOUD_URL, color: "#a78bfa", auto_play: "false", hide_related: "true",
-      show_comments: "false", show_user: "true", show_reposts: "false", show_teaser: "false", visual: "false"
-    });
-    $("soundcloudFrame").src = `https://w.soundcloud.com/player/?${params}`;
-    $("soundcloudOpen").href = SOUNDCLOUD_URL;
-    $("soundcloudBox").classList.remove("hidden");
-    shown++;
-  }
-
-  if (shown) $("musicCard").classList.remove("hidden");
-  $("musicGrid").classList.toggle("single", shown === 1);
+function pctHtml(cur, prev, title) {
+  if (!prev || !cur) return "";
+  const pct = Math.round((cur - prev) / prev * 100);
+  const cls = pct > 0 ? "up" : pct < 0 ? "down" : "flat";
+  const sign = pct > 0 ? "▲" : pct < 0 ? "▼" : "±";
+  return `<span class="yoy ${cls}" title="${title}">${sign} ${Math.abs(pct)}%</span>`;
 }
 
 /* ===========================
-   WEEKLY（「すべての年」は直近WEEKLY_SHOW週 → ボタンで全件）
+   SPOTIFY
 =========================== */
-function renderWeekly() {
+function setupSpotify() {
+  const m = SPOTIFY_URL.match(/open\.spotify\.com\/(?:intl-[a-z-]+\/)?(playlist|album|track|artist)\/([A-Za-z0-9]+)/);
+  if (!m) return;
+  $("spotifyFrame").src = `https://open.spotify.com/embed/${m[1]}/${m[2]}?utm_source=generator`;
+  $("spotifyOpen").href = SPOTIFY_URL;
+  $("spotifyCard").classList.remove("hidden");
+}
+
+/* ===========================
+   WEEKLY / MONTHLY 切り替え
+=========================== */
+function setWeeklyMode(mode) {
+  if (mode === weeklyMode) return;
+  weeklyMode = mode;
+  weeklyExpanded = false;
+  try { localStorage.setItem("weeklyMode", mode); } catch (e) {}
+  renderWeekly();
+  enterSection("weekly");
+}
+
+function renderWeekly(animate = true) {
+  const isMonth = weeklyMode === "month";
+  $("modeWeek").classList.toggle("active", !isMonth);
+  $("modeMonth").classList.toggle("active", isMonth);
+  $("modeWeek").setAttribute("aria-pressed", String(!isMonth));
+  $("modeMonth").setAttribute("aria-pressed", String(isMonth));
+  $("weeklyTitle").textContent = isMonth ? "Monthly History" : "Weekly History";
+  $("monthChartCard").classList.toggle("hidden", !isMonth);
+  if (isMonth) { renderMonthly(animate); return; }
+
+  $("weeklySub").textContent = "週ごとの記録";
   const year = $("weeklyYearFilter").value;
   const latest = weeklyData.at(-1);
   const best = weeklyData.reduce((a, b) => (b.minutes > (a?.minutes ?? 0) ? b : a), null);
@@ -972,27 +1025,73 @@ function toggleWeekly() {
 }
 
 /* ===========================
+   MONTHLY（週の記録を月ごとに合計）
+=========================== */
+function filteredMonths() {
+  const year = $("weeklyYearFilter").value;
+  const { list, unknown } = buildMonthly();
+  return { all: list, data: list.filter(mo => year === "all" || mo.year === year), unknown, year };
+}
+
+function renderMonthly(animate = true) {
+  const { all, data, unknown } = filteredMonths();
+  $("weeklySub").textContent = unknown
+    ? `月ごとの記録（週の記録から集計 · 月を判定できない週 ${unknown}件）`
+    : "月ごとの記録（週の記録から集計）";
+  $("weeklyCount").textContent = `${data.length}か月`;
+  $("weeklyMore").innerHTML = "";
+
+  const best = all.reduce((a, b) => (b.minutes > (a?.minutes ?? 0) ? b : a), null);
+  const latest = all.at(-1);
+  const bestBadge = `<span class="badge best">🔥 BEST</span>`;
+  const wipBadge  = `<span class="badge wip">集計中</span>`;
+
+  $("weeklyList").innerHTML = data.length ? [...data].reverse().map(mo => {
+    const isNow = mo.year === THIS_YEAR && mo.month === THIS_MONTH;
+    return `
+    <article class="data-card anim ${mo === latest ? "is-latest" : ""}">
+      <div class="data-card-title"><span class="yr">${esc(mo.year)}</span>${mo.month}月${isNow ? wipBadge : ""}${mo === best ? bestBadge : ""}</div>
+      <div class="data-card-time">⏱ ${fmt(mo.minutes)} 分 ${pctHtml(mo.minutes, mo.prev?.minutes, "前月比")}</div>
+      <div class="data-card-note">${mo.weeks}週分の記録 · 週平均 ${fmt(Math.round(mo.minutes / mo.weeks))}分</div>
+      <hr class="data-card-divider">
+      <div class="mini-label">TOP ARTISTS</div>
+      ${artistListHtml(mo.tops)}
+    </article>`;
+  }).join("") : `<div class="empty">月ごとの記録を作れませんでした</div>`;
+
+  if (currentSection === "weekly") renderMonthChart(animate);
+}
+
+function renderMonthChart(animate = true) {
+  if (typeof Chart === "undefined") return;
+  const { data, year } = filteredMonths();
+  const recent = year === "all" ? data.slice(-CHART_MONTHS) : data;
+  if (monthChartInst) { monthChartInst.destroy(); monthChartInst = null; }
+  if (!recent.length) { $("monthChartLabel").textContent = "MONTHLY TREND"; return; }
+  const avg = Math.round(recent.reduce((a, b) => a + b.minutes, 0) / recent.length);
+  $("monthChartLabel").innerHTML = `MONTHLY TREND<span class="label-sub">${recent.length}か月 · 平均 ${fmt(avg)}分</span>`;
+  const labels = recent.map(mo => year === "all" ? `${mo.year.slice(2)}/${mo.month}` : `${mo.month}月`);
+  monthChartInst = barChart($("monthlyChart"), labels, recent.map(mo => mo.minutes),
+    recent.map(mo => `${mo.year}年${mo.month}月`), avg, animate);
+}
+
+/* ===========================
    ANNUAL（前年比つき）
 =========================== */
-function yoyHtml(y) {
-  const prev = yearlyData.find(p => Number(p.year) === Number(y.year) - 1);
-  if (!prev || !prev.minutes || !y.minutes) return "";
-  const pct = Math.round((y.minutes - prev.minutes) / prev.minutes * 100);
-  const cls = pct > 0 ? "up" : pct < 0 ? "down" : "flat";
-  const sign = pct > 0 ? "▲" : pct < 0 ? "▼" : "±";
-  return `<span class="yoy ${cls}" title="前年比">${sign} ${Math.abs(pct)}%</span>`;
-}
 function renderAnnual() {
   const marks = ["🥇", "🥈", "🥉", "4", "5"];
   const data = [...yearlyData].reverse();
-  $("annualList").innerHTML = data.length ? data.map(y => `
+  $("annualList").innerHTML = data.length ? data.map(y => {
+    const prev = yearlyData.find(p => Number(p.year) === Number(y.year) - 1);
+    return `
     <article class="data-card anim">
       <div class="data-card-title">${esc(y.year)}</div>
-      <div class="data-card-time">⏱ ${fmt(y.minutes)} 分 · ${fmt(y.songs)} 曲 ${yoyHtml(y)}</div>
+      <div class="data-card-time">⏱ ${fmt(y.minutes)} 分 · ${fmt(y.songs)} 曲 ${pctHtml(y.minutes, prev?.minutes, "前年比")}</div>
       <hr class="data-card-divider">
       <div class="mini-label">TOP ARTISTS</div>
       ${artistListHtml(y.artists, marks)}
-    </article>`).join("") : `<div class="empty">まだ記録がありません</div>`;
+    </article>`;
+  }).join("") : `<div class="empty">まだ記録がありません</div>`;
 }
 
 /* ===========================
@@ -1070,34 +1169,28 @@ function renderLive() {
 }
 
 /* ===========================
-   CHART（平均ラインつき）
+   CHART（棒グラフ＋平均ライン 共通）
 =========================== */
-function renderChart(animate = true) {
-  if (typeof Chart === "undefined" || !weeklyData.length) return;
-  const recent = weeklyData.slice(-CHART_WEEKS);
-  const avg = recent.length ? Math.round(recent.reduce((a, b) => a + b.minutes, 0) / recent.length) : 0;
-  $("chartLabel").innerHTML = `WEEKLY TREND<span class="label-sub">直近${recent.length}週 · 平均 ${fmt(avg)}分</span>`;
-
-  if (chartInst) chartInst.destroy();
+function barChart(canvas, labels, values, titles, avg, animate) {
   const isDark = document.body.classList.contains("dark");
   const gridColor = isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.05)";
   const textColor = isDark ? "#9a92bd" : "#6b6384";
-  const last = recent.length - 1;
+  const last = values.length - 1;
 
-  chartInst = new Chart($("weeklyChart"), {
+  return new Chart(canvas, {
     type: "bar",
     data: {
-      labels: recent.map(w => w.week),
+      labels,
       datasets: [
         {
-          data: recent.map(w => w.minutes),
-          backgroundColor: recent.map((_, i) => i === last ? "#a78bfa" : "rgba(167,139,250,0.28)"),
+          data: values,
+          backgroundColor: values.map((_, i) => i === last ? "#a78bfa" : "rgba(167,139,250,0.28)"),
           hoverBackgroundColor: "#38bdf8",
           borderRadius: 8, borderSkipped: false, maxBarThickness: 56, order: 1
         },
         {
           type: "line",
-          data: recent.map(() => avg),
+          data: values.map(() => avg),
           borderColor: "#38bdf8", borderWidth: 1.5, borderDash: [5, 5],
           pointRadius: 0, pointHoverRadius: 0, fill: false, order: 0
         }
@@ -1108,7 +1201,7 @@ function renderChart(animate = true) {
       interaction: { mode: "index", intersect: false },
       animation: REDUCED || !animate ? false : {
         duration: 900, easing: "easeOutQuart",
-        delay: ctx => ctx.type === "data" && ctx.mode === "default" ? ctx.dataIndex * 70 : 0
+        delay: ctx => ctx.type === "data" && ctx.mode === "default" ? ctx.dataIndex * 60 : 0
       },
       plugins: {
         legend: { display: false },
@@ -1116,7 +1209,7 @@ function renderChart(animate = true) {
           displayColors: false,
           filter: item => item.datasetIndex === 0,
           callbacks: {
-            title: items => { const w = recent[items[0].dataIndex]; return `${w.year} / ${w.week}`; },
+            title: items => titles[items[0].dataIndex],
             label: c => `${fmt(c.parsed.y)} 分`,
             afterLabel: c => {
               const d = c.parsed.y - avg;
@@ -1126,12 +1219,22 @@ function renderChart(animate = true) {
         }
       },
       scales: {
-        x: { grid: { display: false }, ticks: { color: textColor, maxRotation: 0, font: { family: "'Space Mono'", size: 10 } } },
+        x: { grid: { display: false }, ticks: { color: textColor, maxRotation: 0, autoSkip: true, font: { family: "'Space Mono'", size: 10 } } },
         y: { beginAtZero: true, grid: { color: gridColor }, border: { display: false },
              ticks: { color: textColor, font: { family: "'Space Mono'", size: 10 }, callback: v => fmt(v) } }
       }
     }
   });
+}
+
+function renderChart(animate = true) {
+  if (typeof Chart === "undefined" || !weeklyData.length) return;
+  const recent = weeklyData.slice(-CHART_WEEKS);
+  const avg = Math.round(recent.reduce((a, b) => a + b.minutes, 0) / recent.length);
+  $("chartLabel").innerHTML = `WEEKLY TREND<span class="label-sub">直近${recent.length}週 · 平均 ${fmt(avg)}分</span>`;
+  if (chartInst) chartInst.destroy();
+  chartInst = barChart($("weeklyChart"), recent.map(w => w.week), recent.map(w => w.minutes),
+    recent.map(w => `${w.year} / ${w.week}`), avg, animate);
 }
 
 /* ===========================
@@ -1147,7 +1250,9 @@ function toggleTheme() {
   const dark = !document.body.classList.contains("dark");
   applyTheme(dark);
   try { localStorage.setItem("theme", dark ? "dark" : "light"); } catch (e) {}
-  if (weeklyData.length && currentSection === "dashboard") renderChart();
+  if (!weeklyData.length) return;
+  if (currentSection === "dashboard") renderChart();
+  if (currentSection === "weekly" && weeklyMode === "month") renderMonthChart();
 }
 
 /* ===========================
@@ -1162,7 +1267,9 @@ function showSection() {
     t.dataset.section === id ? t.setAttribute("aria-current", "page") : t.removeAttribute("aria-current"));
   window.scrollTo({ top: 0 });
   enterSection(id);
-  if (id === "dashboard" && weeklyData.length) renderChart();
+  if (!weeklyData.length) return;
+  if (id === "dashboard") renderChart();
+  if (id === "weekly" && weeklyMode === "month") renderMonthChart();
 }
 window.addEventListener("hashchange", showSection);
 
@@ -1175,7 +1282,7 @@ document.querySelectorAll(".tab").forEach(t => t.addEventListener("click", () =>
    INIT
 =========================== */
 applyTheme(document.body.classList.contains("dark"));
-setupMusic();
+setupSpotify();
 showSection();
 loadData();
 </script>
