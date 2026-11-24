@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>My Music Archive</title>
 <meta name="description" content="自分の音楽の聴き方・ライブ参戦の記録">
-<meta name="theme-color" content="#e8e4f8" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#12101e" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f3f6fb" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0b111b" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎧</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,47 +15,63 @@
 <style>
 /* ===========================
    ROOT & THEME
+   色を変えるときは :root（ライト）と body.dark（ダーク）の2か所だけ直せばOK
 =========================== */
 :root {
-  --bg-start: #e8e4f8;
-  --bg-mid:   #f5e4f0;
-  --bg-end:   #ddf0f8;
-  --surface:  rgba(255,255,255,0.75);
-  --surface-solid: #ffffff;
-  --nav-bg:   rgba(255,255,255,0.78);
-  --border:   rgba(180,170,220,0.35);
-  --text:     #1a1628;
-  --text-muted: #6b6384;
-  --text-dim:   #8f86ad;
-  --accent-a: #7b5ea7;
-  --accent-b: #38bdf8;
-  --grad: linear-gradient(120deg, #a78bfa, #38bdf8);
+  --bg-start: #dde8fa;
+  --bg-mid:   #f3f6fb;
+  --bg-end:   #dcf0f3;
+  --surface:  rgba(255,255,255,0.82);
+  --surface-solid: #f3f6fb;
+  --nav-bg:   rgba(243,246,251,0.82);
+  --border:   rgba(96,125,165,0.28);
+  --text:     #0f1b2d;
+  --text-muted: #55657c;
+  --text-dim:   #7888a0;
+  --accent-a: #1d63d8;                                     /* メイン（青） */
+  --accent-b: #d97706;                                     /* サブ（アンバー）：参戦予定・平均ライン・フォーカス */
+  --accent-b-ink: #b45309;                                 /* サブ色の文字用 */
+  --grad:     linear-gradient(120deg, #1b5fd9, #2a8fe8);   /* 塗り：タブ・バッジ・チケットの半券 */
+  --grad-ink: linear-gradient(120deg, #1857cf, #2a8fe8);   /* グラデ文字：数字・見出し */
+  --on-grad:  #ffffff;                                     /* 塗りの上の文字 */
   --green: #059669;
   --red:   #dc2626;
-  --skel-a: rgba(120,100,200,0.08);
-  --skel-b: rgba(120,100,200,0.18);
+  --chart-bar:     #2a7de1;
+  --chart-bar-dim: rgba(42,125,225,0.26);
+  --chart-grid:    rgba(15,27,45,0.06);
+  --skel-a: rgba(40,90,160,0.07);
+  --skel-b: rgba(40,90,160,0.15);
   --font: 'Inter', 'Hiragino Sans', 'Noto Sans JP', sans-serif;
   --mono: 'Space Mono', monospace;
   --radius: 18px;
-  --shadow: 0 4px 24px rgba(120,100,200,0.10);
+  --shadow: 0 4px 24px rgba(30,60,110,0.08);
+  --shadow-hover: 0 8px 30px rgba(30,60,110,0.15);
+  --playlist-h: 352px;                                     /* プレイリストの高さ（PCで横並びのときはグラフも同じ高さ） */
 }
 body.dark {
-  --bg-start: #12101e;
-  --bg-mid:   #1a1228;
-  --bg-end:   #0f1a24;
-  --surface:  rgba(30,26,50,0.85);
-  --surface-solid: #16132a;
-  --nav-bg:   rgba(18,16,30,0.82);
-  --border:   rgba(120,100,200,0.2);
-  --text:     #ede8ff;
-  --text-muted: #9a92bd;
-  --text-dim:   #6b6490;
-  --accent-a: #a78bfa;
+  --bg-start: #0f2240;
+  --bg-mid:   #0d1522;
+  --bg-end:   #0a2229;
+  --surface:  rgba(21,29,44,0.86);
+  --surface-solid: #0b111b;
+  --nav-bg:   rgba(11,17,27,0.82);
+  --border:   rgba(130,160,205,0.18);
+  --text:     #e6edf7;
+  --text-muted: #93a3ba;
+  --text-dim:   #6b7a92;
+  --accent-a: #7ab3ff;
+  --accent-b: #fbbf24;
+  --accent-b-ink: #fcd34d;
+  --grad-ink: linear-gradient(120deg, #6aaeff, #8fd3ff);
   --green: #34d399;
   --red:   #f87171;
+  --chart-bar:     #5ea5ff;
+  --chart-bar-dim: rgba(94,165,255,0.28);
+  --chart-grid:    rgba(255,255,255,0.06);
   --skel-a: rgba(255,255,255,0.04);
   --skel-b: rgba(255,255,255,0.10);
   --shadow: 0 4px 24px rgba(0,0,0,0.35);
+  --shadow-hover: 0 8px 30px rgba(0,0,0,0.5);
 }
 
 /* ===========================
@@ -87,7 +103,7 @@ button, select, input { font-family: inherit; }
 =========================== */
 .eq { display: inline-flex; align-items: flex-end; gap: 3px; height: 18px; }
 .eq span {
-  width: 3px; height: 100%; border-radius: 2px; background: var(--grad);
+  width: 3px; height: 100%; border-radius: 2px; background: var(--grad-ink);
   transform-origin: bottom; animation: eq 1.1s ease-in-out infinite;
 }
 .eq span:nth-child(1) { animation-delay: -0.9s; }
@@ -120,7 +136,7 @@ button, select, input { font-family: inherit; }
 .splash .eq span { width: 8px; border-radius: 4px; }
 .splash-title {
   font-size: 26px; font-weight: 800; letter-spacing: -0.03em;
-  background: var(--grad); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+  background: var(--grad-ink); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
   animation: fadeUp .7s .1s both;
 }
 .splash-sub { font-family: var(--mono); font-size: 11px; letter-spacing: .18em; color: var(--text-muted); animation: fadeUp .7s .25s both; }
@@ -148,16 +164,16 @@ button, select, input { font-family: inherit; }
   transition: background 0.2s, color 0.2s, transform 0.2s;
 }
 .tab-icon { display: none; }
-.tab:hover { background: rgba(120,100,200,0.1); color: var(--text); }
+.tab:hover { background: color-mix(in srgb, var(--accent-a) 10%, transparent); color: var(--text); }
 .tab:active { transform: scale(0.95); }
-.tab[aria-current="page"] { background: var(--grad); color: #fff; }
+.tab[aria-current="page"] { background: var(--grad); color: var(--on-grad); }
 .theme-btn {
   background: var(--surface); border: 1px solid var(--border); color: var(--text);
   width: 36px; height: 36px; border-radius: 50%; font-size: 15px; cursor: pointer;
   display: flex; align-items: center; justify-content: center; flex-shrink: 0;
   transition: background 0.2s, transform 0.5s cubic-bezier(.5,1.6,.4,1);
 }
-.theme-btn:hover { background: rgba(120,100,200,0.15); }
+.theme-btn:hover { background: color-mix(in srgb, var(--accent-a) 14%, transparent); }
 .theme-btn.spin { transform: rotate(360deg); }
 
 /* ===========================
@@ -167,10 +183,10 @@ button, select, input { font-family: inherit; }
 .section-header { margin-bottom: 24px; display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
 .section-header h2 {
   font-size: 28px; font-weight: 800; letter-spacing: -0.03em;
-  background: var(--grad); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+  background: var(--grad-ink); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
 }
 .section-sub { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
-.grad-text { background: var(--grad); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+.grad-text { background: var(--grad-ink); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
 .mb { margin-bottom: 16px; }
 
 @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
@@ -187,7 +203,7 @@ button, select, input { font-family: inherit; }
 }
 .data-card:hover, .ticket:hover, .stat-block:hover {
   border-color: color-mix(in srgb, var(--accent-a) 55%, transparent);
-  box-shadow: 0 8px 30px rgba(120,100,200,0.16);
+  box-shadow: var(--shadow-hover);
 }
 .data-card:hover { transform: translateY(-2px); }
 .card { padding: 24px; }
@@ -212,10 +228,16 @@ button, select, input { font-family: inherit; }
 
 /* ===========================
    CHART / SPOTIFY
+   PC（幅901px以上）はグラフとプレイリストを横並び、それ以下は縦に並ぶ
 =========================== */
 .chart-wrap { position: relative; height: 260px; }
-.spotify-card { padding-bottom: 20px; }
-.spotify-frame { display: block; width: 100%; height: 152px; border: 0; border-radius: 12px; }
+.spotify-frame { display: block; width: 100%; height: var(--playlist-h); border: 0; border-radius: 12px; }
+.duo { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px 14px; }
+.duo .card-head { min-height: 22px; }
+@media (min-width: 901px) {
+  .duo.with-playlist { grid-template-columns: minmax(0, 4fr) minmax(0, 5fr); }  /* グラフ : プレイリスト の幅の比 */
+  .duo.with-playlist .chart-wrap { height: var(--playlist-h); }
+}
 
 /* ===========================
    LATEST WEEK
@@ -226,7 +248,7 @@ button, select, input { font-family: inherit; }
 .delta { display: inline-flex; align-items: center; gap: 4px; margin-top: 10px; font-size: 12px; font-weight: 600; font-family: var(--mono); padding: 3px 10px; border-radius: 99px; animation: fadeUp .5s .6s both; }
 .delta.up,   .yoy.up   { color: var(--green); background: color-mix(in srgb, var(--green) 12%, transparent); }
 .delta.down, .yoy.down { color: var(--red);   background: color-mix(in srgb, var(--red) 12%, transparent); }
-.delta.flat, .yoy.flat { color: var(--text-muted); background: rgba(120,100,200,0.08); }
+.delta.flat, .yoy.flat { color: var(--text-muted); background: color-mix(in srgb, var(--text-muted) 12%, transparent); }
 .delta small { font-family: var(--font); font-weight: 500; opacity: .8; }
 .mini-label { font-size: 10px; font-weight: 600; letter-spacing: 0.1em; color: var(--text-dim); margin-bottom: 8px; }
 
@@ -247,9 +269,9 @@ button, select, input { font-family: inherit; }
 .data-card-note { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
 .data-card-divider { border: none; border-top: 1px solid var(--border); margin: 14px 0 12px; }
 .data-card.is-latest { border-color: var(--accent-a); }
-.badge { display: inline-flex; align-items: center; gap: 5px; font-size: 10px; font-weight: 700; letter-spacing: .08em; color: #fff; background: var(--grad); padding: 3px 8px; border-radius: 99px; margin-left: 8px; }
-.badge .eq span { background: #fff; }
-.badge.best { background: linear-gradient(120deg, #fb923c, #f43f5e); }
+.badge { display: inline-flex; align-items: center; gap: 5px; font-size: 10px; font-weight: 700; letter-spacing: .08em; color: var(--on-grad); background: var(--grad); padding: 3px 8px; border-radius: 99px; margin-left: 8px; }
+.badge .eq span { background: var(--on-grad); }
+.badge.best { color: #fff; background: linear-gradient(120deg, #fb923c, #f43f5e); }
 .badge.wip  { background: none; color: var(--text-muted); border: 1px dashed var(--border); }
 .yoy { font-size: 11px; font-weight: 700; padding: 1px 8px; border-radius: 99px; }
 
@@ -261,7 +283,7 @@ button, select, input { font-family: inherit; }
   transition: background .2s, color .2s;
 }
 .seg-btn:hover { color: var(--text); }
-.seg-btn.active { background: var(--grad); color: #fff; }
+.seg-btn.active { background: var(--grad); color: var(--on-grad); }
 
 .more-wrap { display: flex; justify-content: center; margin-top: 18px; }
 .more-wrap:empty { display: none; }
@@ -270,7 +292,7 @@ button, select, input { font-family: inherit; }
   font-size: 13px; font-weight: 600; padding: 9px 22px; border-radius: 99px; cursor: pointer;
   transition: border-color .2s, transform .2s, background .2s;
 }
-.more-btn:hover { border-color: var(--accent-a); background: rgba(167,139,250,0.08); }
+.more-btn:hover { border-color: var(--accent-a); background: color-mix(in srgb, var(--accent-a) 8%, transparent); }
 .more-btn:active { transform: scale(0.97); }
 
 /* ===========================
@@ -288,7 +310,7 @@ button, select, input { font-family: inherit; }
 .ticket { display: grid; grid-template-columns: 82px 1fr; overflow: hidden; border-radius: 16px; }
 .ticket:hover { transform: translateY(-3px); }
 .ticket-stub {
-  background: var(--grad); color: #fff; text-align: center;
+  background: var(--grad); color: var(--on-grad); text-align: center;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   padding: 14px 6px;
 }
@@ -313,15 +335,14 @@ button, select, input { font-family: inherit; }
 .ticket-tag {
   display: inline-block; font-family: var(--mono); font-size: 10px; font-weight: 700;
   padding: 2px 9px; border-radius: 99px;
-  color: var(--accent-a); background: rgba(167,139,250,0.14);
+  color: var(--accent-a); background: color-mix(in srgb, var(--accent-a) 14%, transparent);
 }
-.ticket-tag.first { color: var(--text-muted); background: rgba(120,100,200,0.08); }
-.ticket-tag.soon  { color: #0284c7; background: rgba(56,189,248,0.16); }
-body.dark .ticket-tag.soon { color: var(--accent-b); }
+.ticket-tag.first { color: var(--text-muted); background: color-mix(in srgb, var(--text-muted) 12%, transparent); }
+.ticket-tag.soon  { color: var(--accent-b-ink); background: color-mix(in srgb, var(--accent-b) 16%, transparent); }
 
 /* 参戦予定のチケット */
 .ticket.upcoming { border: 1px dashed var(--accent-b); }
-.ticket.upcoming .ticket-stub { background: rgba(56,189,248,0.12); color: var(--text); }
+.ticket.upcoming .ticket-stub { background: color-mix(in srgb, var(--accent-b) 12%, transparent); color: var(--text); }
 
 /* ===========================
    FILTER
@@ -370,7 +391,7 @@ body.dark .ticket-tag.soon { color: var(--accent-b); }
   border: 1px solid color-mix(in srgb, var(--red) 35%, transparent);
   border-radius: 14px; padding: 12px 16px; margin-bottom: 16px; font-size: 13px;
 }
-.error-banner button { background: var(--grad); color: #fff; border: none; border-radius: 99px; padding: 6px 14px; font-size: 12px; font-weight: 600; cursor: pointer; flex-shrink: 0; }
+.error-banner button { background: var(--grad); color: var(--on-grad); border: none; border-radius: 99px; padding: 6px 14px; font-size: 12px; font-weight: 600; cursor: pointer; flex-shrink: 0; }
 
 /* ===========================
    RESPONSIVE
@@ -398,7 +419,7 @@ body.dark .ticket-tag.soon { color: var(--accent-b); }
   }
   .tab { flex-direction: column; gap: 3px; padding: 6px 0; font-size: 10px; border-radius: 12px; justify-content: center; }
   .tab-icon { display: block; font-size: 18px; line-height: 1; transition: transform .25s cubic-bezier(.5,1.6,.4,1); }
-  .tab[aria-current="page"] { background: rgba(120,100,200,0.14); color: var(--text); }
+  .tab[aria-current="page"] { background: color-mix(in srgb, var(--accent-a) 14%, transparent); color: var(--text); }
   .tab[aria-current="page"] .tab-icon { transform: translateY(-2px) scale(1.12); }
   .section-header h2 { font-size: 24px; }
   .stat-row, .stat-row.three { grid-template-columns: 1fr; }
@@ -488,18 +509,21 @@ body.dark .ticket-tag.soon { color: var(--accent-b); }
       </div>
     </div>
 
-    <div class="card anim mb">
-      <div class="card-head"><div class="card-label" id="chartLabel">WEEKLY TREND</div></div>
-      <div class="chart-wrap"><canvas id="weeklyChart" aria-label="週ごとの再生時間グラフ" role="img"></canvas></div>
-    </div>
-
-    <div id="spotifyCard" class="card spotify-card anim hidden">
-      <div class="card-head">
-        <div class="card-label">🎧 MY PLAYLIST</div>
-        <a id="spotifyOpen" class="more-link" target="_blank" rel="noopener">Spotifyで開く <span class="arrow">↗</span></a>
+    <!-- グラフ＋プレイリスト（PCは横並び / スマホは縦並び） -->
+    <div id="homeDuo" class="duo">
+      <div class="card anim">
+        <div class="card-head"><div class="card-label" id="chartLabel">WEEKLY TREND</div></div>
+        <div class="chart-wrap"><canvas id="weeklyChart" aria-label="週ごとの再生時間グラフ" role="img"></canvas></div>
       </div>
-      <iframe id="spotifyFrame" class="spotify-frame" title="Spotifyプレイリスト" loading="lazy"
-        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe>
+
+      <div id="spotifyCard" class="card anim hidden">
+        <div class="card-head">
+          <div class="card-label">🎧 MY PLAYLIST</div>
+          <a id="spotifyOpen" class="more-link" target="_blank" rel="noopener">Spotifyで開く <span class="arrow">↗</span></a>
+        </div>
+        <iframe id="spotifyFrame" class="spotify-frame" title="Spotifyプレイリスト" loading="lazy"
+          allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe>
+      </div>
     </div>
   </section>
 
@@ -637,6 +661,7 @@ const esc = s => String(s ?? "").replace(/[&<>"']/g, c =>
 const fmt = n => Number(n).toLocaleString("ja-JP");
 const $ = id => document.getElementById(id);
 const sleep = ms => new Promise(r => setTimeout(r, ms));
+const cssVar = name => getComputedStyle(document.body).getPropertyValue(name).trim();  // CSSの色変数を読む
 
 /* ===========================
    SPLASH
@@ -967,6 +992,7 @@ function setupSpotify() {
   $("spotifyFrame").src = `https://open.spotify.com/embed/${m[1]}/${m[2]}?utm_source=generator`;
   $("spotifyOpen").href = SPOTIFY_URL;
   $("spotifyCard").classList.remove("hidden");
+  $("homeDuo").classList.add("with-playlist");   // プレイリストがあるときだけ横並びにする
 }
 
 /* ===========================
@@ -1170,11 +1196,14 @@ function renderLive() {
 
 /* ===========================
    CHART（棒グラフ＋平均ライン 共通）
+   色はCSSの変数（--chart-bar など）から読む
 =========================== */
 function barChart(canvas, labels, values, titles, avg, animate) {
-  const isDark = document.body.classList.contains("dark");
-  const gridColor = isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.05)";
-  const textColor = isDark ? "#9a92bd" : "#6b6384";
+  const gridColor = cssVar("--chart-grid");
+  const textColor = cssVar("--text-muted");
+  const barColor  = cssVar("--chart-bar");
+  const barDim    = cssVar("--chart-bar-dim");
+  const markColor = cssVar("--accent-b");
   const last = values.length - 1;
 
   return new Chart(canvas, {
@@ -1184,14 +1213,14 @@ function barChart(canvas, labels, values, titles, avg, animate) {
       datasets: [
         {
           data: values,
-          backgroundColor: values.map((_, i) => i === last ? "#a78bfa" : "rgba(167,139,250,0.28)"),
-          hoverBackgroundColor: "#38bdf8",
+          backgroundColor: values.map((_, i) => i === last ? barColor : barDim),
+          hoverBackgroundColor: markColor,
           borderRadius: 8, borderSkipped: false, maxBarThickness: 56, order: 1
         },
         {
           type: "line",
           data: values.map(() => avg),
-          borderColor: "#38bdf8", borderWidth: 1.5, borderDash: [5, 5],
+          borderColor: markColor, borderWidth: 1.5, borderDash: [5, 5],
           pointRadius: 0, pointHoverRadius: 0, fill: false, order: 0
         }
       ]
